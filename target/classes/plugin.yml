@@ -18,14 +18,19 @@ commands:
     usage: /token
   cic:
     description: CreativeItemCommand Admin command
-    usage: /cic reload
+    usage: /cic <reload|list|store>
+  commandmaker:
+    description: CommandMaker admin command
+    usage: /commandmaker reload
 
 
 permissions:
   friendlycore.admin:
     default: op
+  # Tokens
   friendlycore.tokens.admin:
     default: op
+  # CIC
   friendlycore.cic.bypass.enchantments:
     description: Bypass enchantment checks
     default: op
@@ -36,4 +41,6 @@ permissions:
     description: Bypass custom potion checks
     default: op
   friendlycore.cic.admin:
+    default: op
+  friendlycore.cic.give:
     default: op

@@ -10,6 +10,8 @@ features:
     enabled: true
   creative-item-control:
     enabled: true
+  command-maker:
+    enabled: true
 
 
 tokens:
@@ -37,6 +39,7 @@ creativeitemcontrol:
       - vip
       - flat
     blacklist: false # If true, above worlds config will act as a blacklist
+    give-cooldown: 5 # Seconds before being able to use /cic give again. 0 = no cooldown
 
 
 
@@ -60,3 +63,34 @@ creativeitemcontrol:
 
   potions:
     enabled: true
+
+
+commandmaker:
+  enabled-commands:
+    - website
+    - limits
+    - store
+    - map
+    - ticket
+    - support
+
+  commands:
+    website:
+      aliases: []
+      message:
+        - "&bVisit our website at&f: <click:open_url:'friendlysmp.com'>friendlysmp.com</click>"
+    limits:
+      message:
+        - "&bFor a full list of limits visit <click:open_url:'http://friendlysmp.com/limits'>http://friendlysmp.com/limits</click>"
+    store:
+      message:
+        - "&bVisit our webstore at&f <click:open_url:'https://friendlysmp.com/shop'>friendlysmp.com/shop</click>"
+    map:
+      message:
+        - "&bView our World Map at&f: <click:open_url:'friendlysmp.com/map'>friendlysmp.com/map</click>"
+    ticket:
+      message:
+        - "&aReceive support from a staff member at&f <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
+    support:
+      message:
+        - "&bReceive support from a staff member at&f: <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"

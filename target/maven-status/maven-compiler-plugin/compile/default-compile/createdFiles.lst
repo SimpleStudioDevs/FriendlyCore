@@ -2,8 +2,10 @@ com\friendlysmp\core\features\creativeitemcontrol\handlers\CreativePotionHandler
 com\friendlysmp\core\features\creativeitemcontrol\ItemCheckContext.class
 com\friendlysmp\core\features\creativeitemcontrol\CreativeItemCheck.class
 com\friendlysmp\core\features\withersound\WitherSoundFeature.class
-com\friendlysmp\core\storage\SqlWitherSoundStore.class
+com\friendlysmp\core\features\commandmaker\CommandFeature.class
 com\friendlysmp\core\features\creativeitemcontrol\CreativeFeature.class
+com\friendlysmp\core\features\creativeitemcontrol\CreativeExcludedItemStore.class
+com\friendlysmp\core\features\commandmaker\AdminCommand.class
 com\friendlysmp\core\features\creativeitemcontrol\handlers\CreativePotionHandler$1.class
 com\friendlysmp\core\FriendlyCorePlugin.class
 com\friendlysmp\core\features\tokens\TokenCommand.class
@@ -25,6 +27,7 @@ com\friendlysmp\core\storage\SqlManager.class
 com\friendlysmp\core\command\FriendlyCoreCommand.class
 com\friendlysmp\core\features\withersound\WitherEffectPacketListener.class
 com\friendlysmp\core\features\withersound\WitherSoundJoinListener.class
+com\friendlysmp\core\features\commandmaker\CommandCreator.class
 com\friendlysmp\core\placeholder\PlaceholderRegistrar.class
 com\friendlysmp\core\features\creativeitemcontrol\CreativeCommand.class
 com\friendlysmp\core\features\tokens\TokenFeature.class
