@@ -1,8 +1,9 @@
 package com.friendlysmp.core.storage;
 
-import com.friendlysmp.core.platform.Schedulers;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.friendlysmp.core.schedulers.Schedulers;
 
 import javax.sql.DataSource;
 import java.time.Duration;

@@ -8,7 +8,7 @@ import com.friendlysmp.core.features.tokens.TokenFeature;
 import com.friendlysmp.core.features.withersound.WitherSoundFeature;
 import com.friendlysmp.core.placeholder.PlaceholderProvider;
 import com.friendlysmp.core.placeholder.PlaceholderRegistrar;
-import com.friendlysmp.core.platform.Schedulers;
+import com.friendlysmp.core.schedulers.Schedulers;
 import com.friendlysmp.core.storage.PlayerSettingsStore;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
