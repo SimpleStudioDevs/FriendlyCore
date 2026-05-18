@@ -101,13 +101,18 @@ player-broadcast:
   economy:
     cost: 150
 
-  broadcast:
-    format: "&b&lPLAYER BROADCAST&r &f | <message>"
+  free-uses:
+    legend:
+      count: 1
+      interval: 60
+
 
   messages:
+    broadcast: "&b&lPLAYER BROADCAST&r &f | <message>"
     no_permission: "<red>You do not have permission to use this.</red>"
     usage: "<red>Usage:</red> <yellow>/pbroadcast <message></yellow>"
     not_enough_money: "<red>You need at least <yellow><cost></yellow> to send a broadcast.</red>"
     success: "<green>Broadcast sent for &b150 diamonds.</green>"
+    success_free: "<green>Broadcast sent!</green>"
     reloaded: "<green>PlayerBroadcast config reloaded.</green>"
     no_economy: "<red>Economy is not available. Please contact an administrator.</red>"

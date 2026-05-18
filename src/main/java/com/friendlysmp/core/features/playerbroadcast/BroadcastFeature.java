@@ -5,11 +5,19 @@ import com.friendlysmp.core.feature.Feature;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class BroadcastFeature implements Feature {
     private Economy economy;
     private final FriendlyCorePlugin plugin;
+    private final Map<UUID, long[]> freeUseTracker = new HashMap<>();
 
     public BroadcastFeature(FriendlyCorePlugin plugin) {
         this.plugin = plugin;
@@ -71,6 +79,40 @@ public class BroadcastFeature implements Feature {
         return economy;
     }
     public Configuration getConfig() {return plugin.getConfig(); }
+
+    public int consumeFreeUse(UUID uuid, String group) {
+        if (group == null) return 0;
+
+        long resetMs = plugin.getConfig().getLong("player-broadcast.free-uses." + group + ".interval", 60) * 60_000L;
+        int maxFree = plugin.getConfig().getInt("player-broadcast.free-uses." + group + ".count");
+
+        long[] entry = freeUseTracker.get(uuid);
+        long now = System.currentTimeMillis();
+
+        if (entry == null || now - entry[1] >= resetMs) {
+            freeUseTracker.put(uuid, new long[]{maxFree - 1, now});
+            return maxFree;
+        }
+
+        if (entry[0] > 0) {
+            entry[0]--;
+            return (int) entry[0] + 1;
+        }
+
+        return 0;
+    }
+
+    public @Nullable String resolveGroup(Player player) {
+        ConfigurationSection groups = plugin.getConfig().getConfigurationSection("player-broadcast.free-uses");
+
+        if (groups == null) return null;
+
+        for (String key : groups.getKeys(false)) {
+            String perm = "friendlycore.pbc.free-uses." + key;
+            if (player.hasPermission(perm)) return key;
+        }
+        return null;
+    }
 
 
 }

@@ -41,7 +41,8 @@ public class MessageUtil {
     }
 
     public static Component mmConfig(String key, TagResolver... resolvers) {
-        String raw = plugin.getConfig().getString(key, "");
+        String fullKey = "player-broadcast.messages." + key;
+        String raw = plugin.getConfig().getString(fullKey, "");
         String processed = convertLegacyToMiniMessage(raw);
         if (resolvers == null || resolvers.length == 0) {
             return mini.deserialize(processed);

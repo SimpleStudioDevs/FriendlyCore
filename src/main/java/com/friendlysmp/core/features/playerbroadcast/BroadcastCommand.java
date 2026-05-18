@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BroadcastCommand implements CommandExecutor, TabCompleter {
-    private BroadcastFeature plugin;
+    private final BroadcastFeature plugin;
     private final Economy economy;
 
     public BroadcastCommand(BroadcastFeature plugin) {
@@ -32,11 +32,11 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
 
         if (name.equals("pbreload")) {
             if (!sender.hasPermission("friendlycore.pbc.admin")) {
-                MessageUtil.send(sender, MessageUtil.mmConfig("player-broadcast.messages.no_permission"));
+                MessageUtil.send(sender, MessageUtil.mmConfig("no_permission"));
                 return true;
             }
             plugin.reload();
-            MessageUtil.send(sender, MessageUtil.mmConfig("player-broadcast.messages.reloaded"));
+            MessageUtil.send(sender, MessageUtil.mmConfig("reloaded"));
             return true;
         }
 
@@ -45,46 +45,54 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!player.hasPermission("friendlycore.pbc .use")) {
-            MessageUtil.send(player, MessageUtil.mmConfig("player-broadcast.messages.no_permission"));
+        if (!player.hasPermission("friendlycore.pbc.use")) {
+            MessageUtil.send(player, MessageUtil.mmConfig("no_permission"));
             return true;
         }
 
         if (economy == null) {
-            MessageUtil.send(player, MessageUtil.mmConfig("player-broadcast.messages.no_economy"));
+            MessageUtil.send(player, MessageUtil.mmConfig("no_economy"));
             return true;
         }
 
         if (args.length == 0) {
-            MessageUtil.send(player, MessageUtil.mmConfig("player-broadcast.messages.usage"));
+            MessageUtil.send(player, MessageUtil.mmConfig("usage"));
             return true;
         }
 
         String message = String.join(" ", args);
 
-        double cost = plugin.getConfig().getDouble("player-broadcast.economy.cost", 5000.0);
+        double cost = plugin.getConfig().getDouble("player-broadcast.economy.cost", 150.0);
+        boolean usedFreeUse;
 
-        double balance = economy.getBalance(player);
-        if (balance < cost) {
-            Component notEnough = MessageUtil.mmConfig(
-                    "player-broadcast.messages.not_enough_money",
-                    Placeholder.unparsed("cost", String.valueOf(cost))
-            );
-            MessageUtil.send(player, notEnough);
-            return true;
-        }
+        if (!(plugin.consumeFreeUse(player.getUniqueId(), plugin.resolveGroup(player)) > 0)) { // Check free uses before charging
 
-        economy.withdrawPlayer(player, cost);
+            double balance = economy.getBalance(player);
+            if (balance < cost) {
+                Component notEnough = MessageUtil.mmConfig(
+                        "not_enough_money",
+                        Placeholder.unparsed("cost", String.valueOf(cost))
+                );
+                MessageUtil.send(player, notEnough);
+                return true;
+            }
+
+            economy.withdrawPlayer(player, cost);
+            usedFreeUse = false;
+        } else usedFreeUse = true;
+
+
+
 
         Component broadcast = MessageUtil.mmConfig(
-                "player-broadcast.broadcast.format",
+                "broadcast",
                 Placeholder.unparsed("player", player.getName()),
                 Placeholder.unparsed("message", message)
         );
         Bukkit.getServer().sendMessage(broadcast);
 
         Component success = MessageUtil.mmConfig(
-                "player-broadcast.messages.success",
+                usedFreeUse ?  "success_free" : "success",
                 Placeholder.unparsed("cost", String.valueOf(cost))
         );
         MessageUtil.send(player, success);
