@@ -60,5 +60,5 @@ permissions:
   friendlycore.pbc.admin:
     description: Allows reloading the plugin
     default: op
-  friendlycore.pbc.free:
+  friendlycore.pbc.free-uses:
     description: Parent for pbc free use perms

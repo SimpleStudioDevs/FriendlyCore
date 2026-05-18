@@ -56,7 +56,11 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            MessageUtil.send(player, MessageUtil.mmConfig("usage"));
+            Component component = MessageUtil.mmConfig(
+                    "usage",
+                    Placeholder.unparsed("uses", String.valueOf(plugin.remainingUses(player))),
+                    Placeholder.unparsed("time", plugin.remainingTimeFormatted(player)));
+            MessageUtil.send(player, component);
             return true;
         }
 

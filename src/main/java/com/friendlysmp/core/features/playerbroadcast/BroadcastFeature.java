@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import javax.annotation.Nullable;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -60,6 +61,7 @@ public class BroadcastFeature implements Feature {
     @Override
     public void reload() {
         plugin.reloadConfig();
+        freeUseTracker.clear();
     }
 
     private boolean setupEconomy() {
@@ -104,14 +106,41 @@ public class BroadcastFeature implements Feature {
 
     public @Nullable String resolveGroup(Player player) {
         ConfigurationSection groups = plugin.getConfig().getConfigurationSection("player-broadcast.free-uses");
-
         if (groups == null) return null;
 
         for (String key : groups.getKeys(false)) {
-            String perm = "friendlycore.pbc.free-uses." + key;
-            if (player.hasPermission(perm)) return key;
+            if (player.hasPermission("friendlycore.pbc.free-uses." + key)) return key;
         }
         return null;
+    }
+
+    public int remainingUses(Player player) {
+        String group = resolveGroup(player);
+        if (group == null) return 0;
+
+        long resetMs = plugin.getConfig().getLong("player-broadcast.free-uses." + group + ".interval", 60) * 60_000L;
+        int maxFree = plugin.getConfig().getInt("player-broadcast.free-uses." + group + ".count");
+
+        long[] entry = freeUseTracker.get(player.getUniqueId());
+        if (entry == null || System.currentTimeMillis() - entry[1] >= resetMs) return maxFree;
+
+        return (int) entry[0];
+    }
+
+    public String remainingTimeFormatted(Player player) {
+        String group = resolveGroup(player);
+        if (group == null) return "0 seconds";
+
+        long resetMs = plugin.getConfig().getLong("player-broadcast.free-uses." + group + ".interval", 60) * 60_000L;
+
+        long[] entry = freeUseTracker.get(player.getUniqueId());
+        if (entry == null) return "0 seconds";
+
+        long remainingMs = Math.max(0, resetMs - (System.currentTimeMillis() - entry[1]));
+        long seconds = remainingMs / 1000;
+
+        if (seconds < 60) return seconds + " seconds";
+        return (seconds / 60) + " minutes";
     }
 
 

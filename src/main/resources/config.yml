@@ -46,20 +46,20 @@ creativeitemcontrol:
 
 
   enchantments:
-   # By default, only regular enchantments and levels will be allowed.
-   # Action to take when impossible enchants are found. Options:
-   # LOWER - Set enchants to the highest possible value for that item
-   # REMOVE - Remove enchantments from the item all-together
-   # DELETE - Delete the item
+    # By default, only regular enchantments and levels will be allowed.
+    # Action to take when impossible enchants are found. Options:
+    # LOWER - Set enchants to the highest possible value for that item
+    # REMOVE - Remove enchantments from the item all-together
+    # DELETE - Delete the item
     enabled: true # Enable enchantment checks?
     action: LOWER
-    allow-incompatible: false # Whether or not to allow incompatible enchantments (Sharpness with Smite, Infinity with Mending, etc)
+    allow-incompatible: false # Whether or not to allow incompatible enchantments (Sharpness with Smite, Infinity with Mending, etc.)
 
   attributes:
-  # By default, no attribute modifying items will be allowed
-  # Action to take when attribute modifiers are found. Options:
-  # REMOVE - Remove the attribute modifiers from the item
-  # DELETE - Delete the item
+    # By default, no attribute modifying items will be allowed
+    # Action to take when attribute modifiers are found. Options:
+    # REMOVE - Remove the attribute modifiers from the item
+    # DELETE - Delete the item
     enabled: true
     action: DELETE
 
@@ -102,7 +102,7 @@ player-broadcast:
     cost: 150
 
   free-uses:
-    legend:
+    legend: # pbc.free.legend
       count: 1
       interval: 60
 
@@ -110,7 +110,7 @@ player-broadcast:
   messages:
     broadcast: "&b&lPLAYER BROADCAST&r &f | <message>"
     no_permission: "<red>You do not have permission to use this.</red>"
-    usage: "<red>Usage:</red> <yellow>/pbroadcast <message></yellow>"
+    usage: "<red>Usage:</red> <yellow>/pbroadcast <message></yellow><br><reset>You have <color:#B381FF><uses></color> free uses remaining. Resets in <color:#B381FF><time>"
     not_enough_money: "<red>You need at least <yellow><cost></yellow> to send a broadcast.</red>"
     success: "<green>Broadcast sent for &b150 diamonds.</green>"
     success_free: "<green>Broadcast sent!</green>"
