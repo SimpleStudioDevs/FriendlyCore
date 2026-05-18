@@ -44,6 +44,13 @@
       <id>codemc-snapshots</id>
       <url>https://repo.codemc.io/repository/maven-snapshots/</url>
     </repository>
+
+      <!-- VaultAPI via JitPack -->
+      <repository>
+          <id>jitpack.io</id>
+          <url>https://jitpack.io</url>
+      </repository>
+
   </repositories>
 
   <dependencies>
@@ -81,6 +88,14 @@
   <artifactId>sqlite-jdbc</artifactId>
   <version>3.45.3.0</version>
 </dependency>
+
+      <!-- Vault API (MilkBowl) -->
+      <dependency>
+          <groupId>com.github.MilkBowl</groupId>
+          <artifactId>VaultAPI</artifactId>
+          <version>1.7.1</version>
+          <scope>provided</scope>
+      </dependency>
 
   </dependencies>
 

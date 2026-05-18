@@ -4,6 +4,7 @@ import com.friendlysmp.core.command.FriendlyCoreCommand;
 import com.friendlysmp.core.feature.FeatureManager;
 import com.friendlysmp.core.features.commandmaker.CommandFeature;
 import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
+import com.friendlysmp.core.features.playerbroadcast.BroadcastFeature;
 import com.friendlysmp.core.features.tokens.TokenFeature;
 import com.friendlysmp.core.features.withersound.WitherSoundFeature;
 import com.friendlysmp.core.placeholder.PlaceholderProvider;
@@ -54,6 +55,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new TokenFeature(this, playerSettings));
         featureManager.register(new CreativeFeature(this));
         featureManager.register(new CommandFeature(this));
+        featureManager.register(new BroadcastFeature(this));
 
         var cmd = getCommand("friendlycore");
         if (cmd != null) cmd.setExecutor(new FriendlyCoreCommand(this));
