@@ -16,6 +16,9 @@ features:
     enabled: true
   chat-patrol:
     enabled: true
+  zel-warn-addon:
+    enabled: true
+    debug: false
 
 
 tokens:
@@ -161,3 +164,6 @@ chat-patrol:
   # COMMAND TO EXECUTE FOR PUNISHMENTS
   PUNISHMENTS:
     BLACKLISTED-WORDS-COMMAND: "ban {player} You were banned for using inappropriate language!"
+
+zel-warn-addon:
+  COMMAND: "warn {player} Swearing/Inappropriate "
