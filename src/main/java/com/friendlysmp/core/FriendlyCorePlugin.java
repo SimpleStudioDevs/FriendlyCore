@@ -2,6 +2,7 @@ package com.friendlysmp.core;
 
 import com.friendlysmp.core.command.FriendlyCoreCommand;
 import com.friendlysmp.core.feature.FeatureManager;
+import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
 import com.friendlysmp.core.features.commandmaker.CommandFeature;
 import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
 import com.friendlysmp.core.features.playerbroadcast.BroadcastFeature;
@@ -56,6 +57,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new CreativeFeature(this));
         featureManager.register(new CommandFeature(this));
         featureManager.register(new BroadcastFeature(this));
+        featureManager.register(new ChatPatrolFeature(this, schedulers));
 
         var cmd = getCommand("friendlycore");
         if (cmd != null) cmd.setExecutor(new FriendlyCoreCommand(this));

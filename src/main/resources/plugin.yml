@@ -31,6 +31,11 @@ commands:
     description: Reload PlayerBroadcast config
     usage: "/pbreload"
     permission: friendlycore.pbc.admin
+  chatpatrol:
+    description: Reload ChatPatrol
+    permission: friendlycore.admin
+    aliases:
+      - cp
 
 
 permissions:
