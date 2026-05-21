@@ -1,6 +1,9 @@
 package com.friendlysmp.core.features.playerbroadcast;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -93,6 +96,12 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
                 Placeholder.unparsed("player", player.getName()),
                 Placeholder.unparsed("message", message)
         );
+
+        broadcast = broadcast.hoverEvent(HoverEvent.showText(MessageUtil.mmConfig(
+                "broadcast_hover",
+                Placeholder.unparsed("player", player.getName())
+        )));
+
         Bukkit.getServer().sendMessage(broadcast);
 
         Component success = MessageUtil.mmConfig(

@@ -107,13 +107,14 @@ player-broadcast:
     cost: 150
 
   free-uses:
-    legend: # pbc.free.legend
+    legend:
       count: 1
       interval: 60
 
 
   messages:
     broadcast: "&b&lPLAYER BROADCAST&r &f | <message>"
+    broadcast_hover: "&6<player>"
     no_permission: "<red>You do not have permission to use this.</red>"
     usage: "<red>Usage:</red> <yellow>/pbroadcast <message></yellow><br><reset>You have <color:#B381FF><uses></color> free uses remaining. Resets in <color:#B381FF><time>"
     not_enough_money: "<red>You need at least <yellow><cost></yellow> to send a broadcast.</red>"
