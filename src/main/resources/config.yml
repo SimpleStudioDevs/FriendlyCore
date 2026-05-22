@@ -80,6 +80,7 @@ commandmaker:
     - map
     - ticket
     - support
+    - blockbyblock
 
   commands:
     website:
@@ -101,6 +102,12 @@ commandmaker:
     support:
       message:
         - "&bReceive support from a staff member at&f: <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
+    blockbyblock:
+      aliases:
+        - bbb
+      message:
+        - "<yellow>To check out our latest BBB challenge and it's rules, go here:"
+        - "<green><click:open_url:'friendlysmp.com/blockbyblock'>friendlysmp.com/blockbyblock</click>"
 
 player-broadcast:
   economy:
@@ -164,7 +171,7 @@ chat-patrol:
 
   # COMMAND TO EXECUTE FOR PUNISHMENTS
   PUNISHMENTS:
-    BLACKLISTED-WORDS-COMMAND: "ban {player} You were banned for using inappropriate language!"
+    BLACKLISTED-WORDS-COMMAND: "banip {player} You were banned for using inappropriate language!"
 
 zel-addon:
   COMMAND: "warn {player} Swearing/Inappropriate "
