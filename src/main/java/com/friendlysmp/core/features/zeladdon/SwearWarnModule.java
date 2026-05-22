@@ -1,4 +1,4 @@
-package com.friendlysmp.core.features.zelwarnaddon;
+package com.friendlysmp.core.features.zeladdon;
 
 import it.pino.zelchat.api.message.ChatMessage;
 import it.pino.zelchat.api.message.infraction.ChatInfraction;
@@ -8,12 +8,12 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-@ChatModuleSettings(pluginOwner = "ZelChatWarnAddon")
+@ChatModuleSettings(pluginOwner = "ZelChatAddon")
 public class SwearWarnModule implements ChatModule {
     private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();
-    private final ZelWarnFeature plugin;
+    private final ZelAddonFeature plugin;
 
-    public SwearWarnModule(ZelWarnFeature plugin) { this.plugin = plugin; }
+    public SwearWarnModule(ZelAddonFeature plugin) { this.plugin = plugin; }
 
     @Override
     public void load() {plugin.getLogger().info("SwearWarnModule loaded."); }
@@ -31,7 +31,7 @@ public class SwearWarnModule implements ChatModule {
         String words = String.join(", ", infraction.getFlaggedRules().keySet());
 
         String command = plugin.getConfig()
-                .getString("zel-warn-addon.COMMAND", "say {player} swore: {words}")
+                .getString("zel-addon.COMMAND", "say {player} swore: {words}")
                 .replace("{player}", chatMessage.getBukkitPlayer().getName())
                 .replace("{message}", raw)
                 .replace("{words}", words);
@@ -39,10 +39,12 @@ public class SwearWarnModule implements ChatModule {
         plugin.getSchedulers().global(() -> {
             boolean success = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
 
-            if (plugin.getConfig().getBoolean("features.zel-warn-addon.debug", false)) {
+            if (plugin.getConfig().getBoolean("features.zel-addon.debug", false)) {
                 plugin.getLogger().info("Executed command: " + command + " | success=" + success);
             }
         });
+
+
 
     }
 }

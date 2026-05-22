@@ -8,7 +8,7 @@ import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
 import com.friendlysmp.core.features.playerbroadcast.BroadcastFeature;
 import com.friendlysmp.core.features.tokens.TokenFeature;
 import com.friendlysmp.core.features.withersound.WitherSoundFeature;
-import com.friendlysmp.core.features.zelwarnaddon.ZelWarnFeature;
+import com.friendlysmp.core.features.zeladdon.ZelAddonFeature;
 import com.friendlysmp.core.placeholder.PlaceholderProvider;
 import com.friendlysmp.core.placeholder.PlaceholderRegistrar;
 import com.friendlysmp.core.schedulers.Schedulers;
@@ -59,7 +59,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new CommandFeature(this));
         featureManager.register(new BroadcastFeature(this));
         featureManager.register(new ChatPatrolFeature(this, schedulers));
-        featureManager.register(new ZelWarnFeature(this, schedulers));
+        featureManager.register(new ZelAddonFeature(this, schedulers));
 
         var cmd = getCommand("friendlycore");
         if (cmd != null) cmd.setExecutor(new FriendlyCoreCommand(this));

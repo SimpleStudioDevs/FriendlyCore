@@ -16,7 +16,7 @@ features:
     enabled: true
   chat-patrol:
     enabled: true
-  zel-warn-addon:
+  zel-addon:
     enabled: true
     debug: false
 
@@ -166,5 +166,10 @@ chat-patrol:
   PUNISHMENTS:
     BLACKLISTED-WORDS-COMMAND: "ban {player} You were banned for using inappropriate language!"
 
-zel-warn-addon:
+zel-addon:
   COMMAND: "warn {player} Swearing/Inappropriate "
+  FORMATS: # Color codes. Must be in order of priority
+    admin: "<white><<gradient:#ef295c:#F18E59:#ef295c>%essentials_nickname%<white>> "
+    manager: "<white><<gradient:#7209B7:#5B2ACA:#7209B7>%essentials_nickname%<white>> "
+    mod: "<white><<color:#37DC75>%essentials_nickname%<white>> "
+    helper: "<white><<color:#2C89F3>%essentials_nickname%</color><white>> "

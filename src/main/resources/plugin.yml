@@ -4,7 +4,7 @@ version: 1.0.0
 api-version: "1.20"
 folia-supported: true
 softdepend: [PlaceholderAPI, Vault]
-depend: [packetevents]
+depend: [packetevents, ZelChat]
 
 commands:
   friendlycore:
