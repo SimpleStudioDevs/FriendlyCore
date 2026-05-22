@@ -31,6 +31,12 @@ public class ZelAddonFeature implements Feature {
     public void enable() {
         swearWarnModule =  new SwearWarnModule(this);
         staffChatModule = new StaffChatModule(loadFormats());
+
+        this.getLogger().info("About to register module...");
+        ZelChatAPI.get().getModuleManager().register(this.plugin, this.swearWarnModule);
+        ZelChatAPI.get().getModuleManager().register(this.plugin, this.staffChatModule);
+        this.getLogger().info("Module register call finished.");
+
     }
 
     @Override
