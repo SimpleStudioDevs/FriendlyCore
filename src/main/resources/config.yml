@@ -188,3 +188,10 @@ bottle-xp:
   max-xp-levels-bottle: 100000
   blocked-redeem-worlds:
     - zelduels_arenas
+
+achievement-guard:
+  BLOCKED-WORLDS:
+    - zelduels_arenas
+    - vip
+    - flat
+    - builds

@@ -2,6 +2,7 @@ package com.friendlysmp.core;
 
 import com.friendlysmp.core.command.FriendlyCoreCommand;
 import com.friendlysmp.core.feature.FeatureManager;
+import com.friendlysmp.core.features.achievementguard.AchievementGuardFeature;
 import com.friendlysmp.core.features.bottlexp.BottleXPFeature;
 import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
 import com.friendlysmp.core.features.commandmaker.CommandFeature;
@@ -62,6 +63,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new ChatPatrolFeature(this, schedulers));
         featureManager.register(new ZelAddonFeature(this, schedulers));
         featureManager.register(new BottleXPFeature(this));
+        featureManager.register(new AchievementGuardFeature(this));
 
         var cmd = getCommand("friendlycore");
         if (cmd != null) cmd.setExecutor(new FriendlyCoreCommand(this));
