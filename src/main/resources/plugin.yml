@@ -36,6 +36,10 @@ commands:
     permission: friendlycore.admin
     aliases:
       - cp
+  bottlexp:
+    description: Store XP points into a bottle
+    usage: /bottlexp <amount|all>
+    aliases: [ bxp ]
 
 
 permissions:

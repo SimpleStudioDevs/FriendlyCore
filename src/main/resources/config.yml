@@ -19,6 +19,9 @@ features:
   zel-addon:
     enabled: true
     debug: false
+  bottle-xp:
+    enabled: true
+    debug: false
 
 
 tokens:
@@ -180,3 +183,8 @@ zel-addon:
     manager: "<white><<gradient:#7209B7:#5B2ACA:#7209B7>%essentials_nickname%<white>> "
     mod: "<white><<color:#37DC75>%essentials_nickname%<white>> "
     helper: "<white><<color:#2C89F3>%essentials_nickname%</color><white>> "
+
+bottle-xp:
+  max-xp-levels-bottle: 100000
+  blocked-redeem-worlds:
+    - zelduels_arenas
