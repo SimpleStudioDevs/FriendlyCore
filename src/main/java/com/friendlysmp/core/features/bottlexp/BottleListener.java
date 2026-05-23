@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class BottleListener implements Listener {
 
     private final FriendlyCorePlugin plugin;
     private final NamespacedKey xpPointsKey;
+    private final NamespacedKey oldPointsKey = new NamespacedKey("stowablexp", "stored_xp_points");
 
     public BottleListener(FriendlyCorePlugin plugin) {
         this.plugin = plugin;
@@ -43,6 +45,20 @@ public class BottleListener implements Listener {
         if (item.getType() != Material.EXPERIENCE_BOTTLE && item.getType() != Material.KNOWLEDGE_BOOK) return;
         if (!item.hasItemMeta()) return;
 
+        ItemMeta meta = item.getItemMeta();
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+
+        if (pdc.has(oldPointsKey, PersistentDataType.DOUBLE)) { // migrate old points keys
+            double xp = pdc.get(oldPointsKey, PersistentDataType.DOUBLE);
+
+            pdc.set(xpPointsKey, PersistentDataType.DOUBLE, xp);
+            pdc.remove(oldPointsKey);
+
+            item.setItemMeta(meta);
+
+        }
+
+
         boolean isSXP =
                 item.getItemMeta().getPersistentDataContainer().has(this.xpPointsKey, PersistentDataType.DOUBLE);
         if (!isSXP) return;
@@ -58,7 +74,6 @@ public class BottleListener implements Listener {
         event.setCancelled(true);
 
         double amountToAdd = 0.0D;
-        ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             amountToAdd = meta.getPersistentDataContainer().get(this.xpPointsKey, PersistentDataType.DOUBLE);
         }
