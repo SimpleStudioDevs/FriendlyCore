@@ -3,8 +3,8 @@ main: com.friendlysmp.core.FriendlyCorePlugin
 version: 1.0.0
 api-version: "1.20"
 folia-supported: true
-softdepend: [PlaceholderAPI]
-depend: [packetevents]
+softdepend: [PlaceholderAPI, Vault]
+depend: [packetevents, ZelChat]
 
 commands:
   friendlycore:
@@ -22,6 +22,27 @@ commands:
   commandmaker:
     description: CommandMaker admin command
     usage: /commandmaker reload
+  pbroadcast:
+    description: Send a paid broadcast message
+    usage: "/pbroadcast <message>"
+    permission: friendlycore.pbc.use
+    aliases: [pbc]
+  pbreload:
+    description: Reload PlayerBroadcast config
+    usage: "/pbreload"
+    permission: friendlycore.pbc.admin
+  chatpatrol:
+    description: Reload ChatPatrol
+    permission: friendlycore.admin
+    aliases:
+      - cp
+  bottlexp:
+    description: Store XP points into a bottle
+    usage: /bottlexp <amount|all>
+    aliases: [ bxp ]
+  achievementguard:
+    description: Reload achievementguad
+    usasge: /achievementguard reload
 
 
 permissions:
@@ -44,3 +65,12 @@ permissions:
     default: op
   friendlycore.cic.give:
     default: op
+  # PBC
+  friendlycore.pbc.use:
+    description: Allows using the broadcast command
+    default: op
+  friendlycore.pbc.admin:
+    description: Allows reloading the plugin
+    default: op
+  friendlycore.pbc.free-uses:
+    description: Parent for pbc free use perms

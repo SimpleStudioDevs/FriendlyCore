@@ -12,6 +12,16 @@ features:
     enabled: true
   command-maker:
     enabled: true
+  player-broadcast:
+    enabled: true
+  chat-patrol:
+    enabled: true
+  zel-addon:
+    enabled: true
+    debug: false
+  bottle-xp:
+    enabled: true
+    debug: false
 
 
 tokens:
@@ -44,20 +54,20 @@ creativeitemcontrol:
 
 
   enchantments:
-   # By default, only regular enchantments and levels will be allowed.
-   # Action to take when impossible enchants are found. Options:
-   # LOWER - Set enchants to the highest possible value for that item
-   # REMOVE - Remove enchantments from the item all-together
-   # DELETE - Delete the item
+    # By default, only regular enchantments and levels will be allowed.
+    # Action to take when impossible enchants are found. Options:
+    # LOWER - Set enchants to the highest possible value for that item
+    # REMOVE - Remove enchantments from the item all-together
+    # DELETE - Delete the item
     enabled: true # Enable enchantment checks?
     action: LOWER
-    allow-incompatible: false # Whether or not to allow incompatible enchantments (Sharpness with Smite, Infinity with Mending, etc)
+    allow-incompatible: false # Whether or not to allow incompatible enchantments (Sharpness with Smite, Infinity with Mending, etc.)
 
   attributes:
-  # By default, no attribute modifying items will be allowed
-  # Action to take when attribute modifiers are found. Options:
-  # REMOVE - Remove the attribute modifiers from the item
-  # DELETE - Delete the item
+    # By default, no attribute modifying items will be allowed
+    # Action to take when attribute modifiers are found. Options:
+    # REMOVE - Remove the attribute modifiers from the item
+    # DELETE - Delete the item
     enabled: true
     action: DELETE
 
@@ -73,6 +83,7 @@ commandmaker:
     - map
     - ticket
     - support
+    - blockbyblock
 
   commands:
     website:
@@ -94,3 +105,93 @@ commandmaker:
     support:
       message:
         - "&bReceive support from a staff member at&f: <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
+    blockbyblock:
+      aliases:
+        - bbb
+      message:
+        - "<yellow>To check out our latest BBB challenge and it's rules, go here:"
+        - "<green><click:open_url:'friendlysmp.com/blockbyblock'>friendlysmp.com/blockbyblock</click>"
+
+player-broadcast:
+  economy:
+    cost: 150
+
+  free-uses:
+    legend:
+      count: 1
+      interval: 60
+
+
+  messages:
+    broadcast: "&b&lPLAYER BROADCAST&r &f | <message>"
+    broadcast_hover: "&6<player>"
+    no_permission: "<red>You do not have permission to use this.</red>"
+    usage: "<red>Usage:</red> <yellow>/pbroadcast <message></yellow><br><reset>You have <color:#B381FF><uses></color> free uses remaining. Resets in <color:#B381FF><time>"
+    not_enough_money: "<red>You need at least <yellow><cost></yellow> to send a broadcast.</red>"
+    success: "<green>Broadcast sent for &b150 diamonds.</green>"
+    success_free: "<green>Broadcast sent!</green>"
+    reloaded: "<green>PlayerBroadcast config reloaded.</green>"
+    no_economy: "<red>Economy is not available. Please contact an administrator.</red>"
+
+chat-patrol:
+  # WORD FILTER
+  ENABLE-WORD-FILTER: true
+  BLACKLISTED-WORDS:
+    - nigger
+    - nigga
+    - niggger
+    - nigggger
+    - niggggger
+    - nigggggger
+    - niggggggger
+    - niggggggggers
+    - -3417976300446998696
+    - 3417976300446998696
+    - faggot
+    - fag
+    - f@g
+    - f@ggot
+    - n1gger
+    - nlgger
+    - negger
+    - neygirs
+    - N!G5ERS
+    - niigger
+    - niiigger
+    - nigg@
+    - niggg@
+    - nigggg@
+    - n!gg@
+    - n!ggg@
+    - n!gggg@
+    - n!66er
+    - n!663r
+    - ni663r
+    - ni66er
+    - n!66@
+    - ni66@
+
+
+  # COMMAND TO EXECUTE FOR PUNISHMENTS
+  PUNISHMENTS:
+    BLACKLISTED-WORDS-COMMAND: "banip {player} You were banned for using inappropriate language!"
+
+zel-addon:
+  COMMAND: "warn {player} Swearing/Inappropriate "
+  FORMATS: # Color codes. Must be in order of priority
+    admin: "<white><<gradient:#ef295c:#F18E59:#ef295c>%essentials_nickname%<white>> "
+    manager: "<white><<gradient:#7209B7:#5B2ACA:#7209B7>%essentials_nickname%<white>> "
+    mod: "<white><<color:#37DC75>%essentials_nickname%<white>> "
+    helper: "<white><<color:#2C89F3>%essentials_nickname%</color><white>> "
+
+bottle-xp:
+  max-xp-levels-bottle: 100000
+  blocked-redeem-worlds:
+    - zelduels_arenas
+
+achievement-guard:
+  BLOCKED-WORLDS:
+    - zelduels_arenas
+    - vip
+    - flat
+    - builds
