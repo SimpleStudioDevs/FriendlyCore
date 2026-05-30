@@ -52,16 +52,21 @@ public class BottleXPCommand implements CommandExecutor, TabCompleter {
 
         final boolean withdrawAll = args[0].equalsIgnoreCase("all");
 
+        final int minPoints = plugin.getConfig().getInt(
+                "bottle-xp.min-xp-points-bottle", 10
+        );
+
         // Total XP the player currently has (points, not levels)
         final double currentXP = getTotalExperience(player);
-        if (currentXP <= 0.0D) {
-            player.sendMessage(Component.text("You don't have any xp to store.", NamedTextColor.RED));
+        if (currentXP <= minPoints) {
+            player.sendMessage(Component.text("You need at least " + minPoints + " xp points to store them", NamedTextColor.RED));
             return true;
         }
 
         final int maxPoints = plugin.getConfig().getInt(
                 "bottle-xp.max-xp-points-bottle", 100000
         );
+
 
 
         // --------------------------
@@ -131,8 +136,8 @@ public class BottleXPCommand implements CommandExecutor, TabCompleter {
         final double amountPerBottle;
         try {
             amountPerBottle = Double.parseDouble(args[0]);
-            if (amountPerBottle <= 0.0D) {
-                player.sendMessage(ChatColor.RED + "Amount must be greater than 0.");
+            if (amountPerBottle <= minPoints) {
+                player.sendMessage(ChatColor.RED + "XP per bottle must be greater than " + minPoints );
                 return true;
             }
         } catch (NumberFormatException e) {

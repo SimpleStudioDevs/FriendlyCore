@@ -185,7 +185,8 @@ zel-addon:
     helper: "<white><<color:#2C89F3>%essentials_nickname%</color><white>> "
 
 bottle-xp:
-  max-xp-levels-bottle: 100000
+  max-xp-points-bottle: 100000
+  min-xp-points-bottle: 10
   blocked-redeem-worlds:
     - zelduels_arenas
 
