@@ -31,6 +31,8 @@ features:
     enabled: true
   chatgames:
     enabled: true
+  beacon-hider:
+    enabled: true
 
 
 tokens:

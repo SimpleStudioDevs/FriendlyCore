@@ -3,6 +3,7 @@ package com.friendlysmp.core;
 import com.friendlysmp.core.command.FriendlyCoreCommand;
 import com.friendlysmp.core.feature.FeatureManager;
 import com.friendlysmp.core.features.achievementguard.AchievementGuardFeature;
+import com.friendlysmp.core.features.beaconhider.BeaconHiderFeature;
 import com.friendlysmp.core.features.bottlexp.BottleXPFeature;
 import com.friendlysmp.core.features.chatgames.ChatgamesFeature;
 import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
@@ -75,6 +76,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new SleepCapFeature(this));
         featureManager.register(new VoidGuardFeature(this));
         featureManager.register(new GeyserCombatLogFeature(this));
+        featureManager.register(new BeaconHiderFeature(this));
 
         // Vault-required features
         if (setupEconomy()) {
