@@ -15,11 +15,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.BoundingBox;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 
 public final class BeaconHiderFeature implements Feature {
 
     private final FriendlyCorePlugin plugin;
+    private final Set<Block> knownBeacons = new HashSet<>();
 
     private ScheduledTask task;
 
@@ -34,6 +38,14 @@ public final class BeaconHiderFeature implements Feature {
 
     @Override
     public void enable() {
+        plugin.getServer().getPluginManager().registerEvents(new BeaconHiderListener(this), plugin);
+
+        for (World world : plugin.getServer().getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) {
+                registerBeaconsInChunk(chunk);
+            }
+        }
+
         int intervalTicks = 80;
         task = plugin.getServer().getGlobalRegionScheduler()
                 .runAtFixedRate(plugin, t -> tick(), intervalTicks, intervalTicks);
@@ -45,20 +57,43 @@ public final class BeaconHiderFeature implements Feature {
             task.cancel();
             task = null;
         }
+        knownBeacons.clear();
     }
 
     @Override
     public void reload() {
     }
 
+    void registerBeaconsInChunk(Chunk chunk) {
+        for (BlockState state : chunk.getTileEntities(b -> b.getType() == Material.BEACON, false)) {
+            knownBeacons.add(state.getBlock());
+        }
+    }
+
+    void unregisterBeaconsInChunk(Chunk chunk) {
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+        World world = chunk.getWorld();
+        knownBeacons.removeIf(block -> block.getWorld().equals(world)
+                && (block.getX() >> 4) == chunkX
+                && (block.getZ() >> 4) == chunkZ);
+    }
+
+    void registerBeacon(Block block) {
+        knownBeacons.add(block);
+    }
+
+    void unregisterBeacon(Block block) {
+        knownBeacons.remove(block);
+    }
+
     private void tick() {
-        for (World world : plugin.getServer().getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                for (BlockState state : chunk.getTileEntities(b -> b.getType() == Material.BEACON, false)) {
-                    if (state instanceof Beacon beacon) {
-                        applyHiddenBeacon(beacon);
-                    }
-                }
+        if (knownBeacons.isEmpty()) return;
+
+        for (Block block : knownBeacons) {
+            if (block.getType() != Material.BEACON) continue;
+            if (block.getState() instanceof Beacon beacon) {
+                applyHiddenBeacon(beacon);
             }
         }
     }
@@ -74,7 +109,7 @@ public final class BeaconHiderFeature implements Feature {
         if (primary == null) return;
         PotionEffect secondary = beacon.getSecondaryEffect();
 
-        int duration = (9 + tier * 2) * 20; 
+        int duration = (9 + tier * 2) * 20;
 
         double range = beacon.getEffectRange();
         if (range <= 0) range = tier * 10 + 10;
