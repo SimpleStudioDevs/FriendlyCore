@@ -27,25 +27,25 @@ public final class WitherSoundCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0 || args[0].equalsIgnoreCase("toggle")) {
             boolean nowMuted = store.toggleWitherDeathMuted(player.getUniqueId());
-            player.sendMessage("Wither spawn sound: " + (nowMuted ? "§cMUTED" : "§aON"));
+            player.sendMessage("Boss global sounds: " + (nowMuted ? "§cMUTED" : "§aON"));
             return true;
         }
 
         if (args[0].equalsIgnoreCase("on")) {
             store.setWitherDeathMuted(player.getUniqueId(), false);
-            player.sendMessage("Wither spawn sound: §aON");
+            player.sendMessage("Boss global sounds: §aON");
             return true;
         }
 
         if (args[0].equalsIgnoreCase("off")) {
             store.setWitherDeathMuted(player.getUniqueId(), true);
-            player.sendMessage("Wither spawn sound: §cMUTED");
+            player.sendMessage("Boos global sounds: §cMUTED");
             return true;
         }
 
         if (args[0].equalsIgnoreCase("status")) {
             boolean muted = store.isWitherDeathMuted(player.getUniqueId());
-            player.sendMessage("Wither spawn sound: " + (muted ? "§cMUTED" : "§aON"));
+            player.sendMessage("Boss global sounds: " + (muted ? "§cMUTED" : "§aON"));
             return true;
         }
 

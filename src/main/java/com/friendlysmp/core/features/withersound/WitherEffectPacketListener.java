@@ -12,6 +12,7 @@ public final class WitherEffectPacketListener extends PacketListenerAbstract {
 
     // ProtocolLib example: 1013 = wither "world event" sound
     private static final int WITHER_GLOBAL_EFFECT_ID = 1023;
+    private static final int DRAGON_GLOBAL_EFFECT_ID = 1028;
 
     private final PlayerSettingsStore store;
     private final boolean debug;
@@ -44,7 +45,8 @@ public final class WitherEffectPacketListener extends PacketListenerAbstract {
         if (!store.isWitherDeathMuted(receiver.getUniqueId())) return;
 
         // Cancel the gong world event
-        if (type == WITHER_GLOBAL_EFFECT_ID) {
+        if (type == WITHER_GLOBAL_EFFECT_ID
+        || type == DRAGON_GLOBAL_EFFECT_ID) {
             event.setCancelled(true);
         }
     }
