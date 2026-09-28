@@ -3,7 +3,7 @@ main: com.friendlysmp.core.FriendlyCorePlugin
 version: 1.0.0
 api-version: "1.20"
 folia-supported: true
-softdepend: [PlaceholderAPI, Vault]
+softdepend: [PlaceholderAPI, Vault, ZelDuels]
 depend: [packetevents, ZelChat]
 
 commands:

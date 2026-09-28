@@ -16,6 +16,7 @@ import com.friendlysmp.core.features.tokens.TokenFeature;
 import com.friendlysmp.core.features.voidguard.VoidGuardFeature;
 import com.friendlysmp.core.features.withersound.WitherSoundFeature;
 import com.friendlysmp.core.features.zeladdon.ZelAddonFeature;
+import com.friendlysmp.core.features.zelduels.ZelDuelsFeature;
 import com.friendlysmp.core.placeholder.PlaceholderProvider;
 import com.friendlysmp.core.placeholder.PlaceholderRegistrar;
 import com.friendlysmp.core.schedulers.Schedulers;
@@ -77,6 +78,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new VoidGuardFeature(this));
         featureManager.register(new GeyserCombatLogFeature(this));
         featureManager.register(new BeaconHiderFeature(this));
+        featureManager.register(new ZelDuelsFeature(this));
 
         // Vault-required features
         if (setupEconomy()) {
