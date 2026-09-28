@@ -1,0 +1,59 @@
+config:
+  enabled: true
+  player-alerts: true # Send a message to the player attempting to get the item
+  alert-cooldown: 1000 # Milliseconds between alerts sent to the same player
+
+  worlds: # Worlds in which the plugin is active
+    - builds
+    - vip
+    - flat
+  blacklist: false # If true, above worlds config will act as a blacklist
+  give-cooldown: 5 # Seconds before being able to use /cic give again. 0 = no cooldown
+  check-dispensers: true # Check items dispensed by dispensers
+
+enchantments:
+  # By default, only regular enchantments and levels will be allowed.
+  # Action to take when impossible enchants are found. Options:
+  # LOWER - Set enchants to the highest possible value for that item
+  # REMOVE - Remove enchantments from the item all-together
+  # DELETE - Delete the item
+  enabled: true # Enable enchantment checks?
+  action: LOWER
+  allow-incompatible: false # Whether or not to allow incompatible enchantments (Sharpness with Smite, Infinity with Mending, etc.)
+
+attributes:
+  # By default, no attribute modifying items will be allowed
+  # Action to take when attribute modifiers are found. Options:
+  # REMOVE - Remove the attribute modifiers from the item
+  # DELETE - Delete the item
+  enabled: true
+  action: DELETE
+
+potions:
+  enabled: true
+
+components:
+  enabled: true
+  blocked:
+    - minecraft:glider
+    - minecraft:consumable
+    - minecraft:equippable
+
+messages:
+  alerts:
+    components: "<b><red>Items with custom components are not allowed here!"
+    attributes: "<b><red>Items with attribute modifiers are not allowed here!"
+    enchantments: "<b><red>Items with impossible enchantments are not allowed here!"
+    potions: "<b><red>Custom potions are not allowed here!"
+  commands:
+    exclude: "&aStored {type} as \"{id}\"."
+    remove: "&aRemoved excluded item \"{id}\"."
+    listempty: "&eNo excluded items stored."
+    give: "&aGave \"{id}\" to &f&a{player}."
+    giveinvalid: "&cNo excluded item found with id \"{id}\"."
+    giveothersfail: "&cYou do not have permission to give to other players!"
+    playernotfound: "&cPlayer \"{player}\" not found."
+    specifyplayer: "&cSpecify a player: /cic give <id> <player>"
+    invalidworld: "&cYou cannot use this in this world!"
+    oncooldown: "&cYou must wait {time}s before receiving this item again."
+    noperm: "&cYou do not have permission!"

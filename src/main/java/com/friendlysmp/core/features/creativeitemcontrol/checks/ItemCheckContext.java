@@ -1,4 +1,4 @@
-package com.friendlysmp.core.features.creativeitemcontrol;
+package com.friendlysmp.core.features.creativeitemcontrol.checks;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,16 +11,17 @@ public class ItemCheckContext {
     public final int slot;
     private boolean cancelled = false;
 
-
-    public ItemCheckContext(Player player, ItemStack item, ItemMeta meta, int slot) {
+    public ItemCheckContext(Player player, ItemStack item, int slot) {
         this.player = player;
         this.item = item;
-        this.meta = meta;
+        this.meta = item.getItemMeta();
         this.slot = slot;
     }
 
-    public void cancel() {this.cancelled = true;}
-    public boolean isCancelled() {return cancelled;}
-    public ItemMeta newItemMeta() {return meta;}
+    public void cancel() { this.cancelled = true; }
+    public boolean isCancelled() { return this.cancelled; }
 
+    public ItemMeta getNewMeta() {
+        return meta;
+    }
 }

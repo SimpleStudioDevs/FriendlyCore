@@ -2,152 +2,70 @@ package com.friendlysmp.core.features.creativeitemcontrol;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
 import com.friendlysmp.core.feature.Feature;
-import io.papermc.paper.datacomponent.DataComponentType;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import com.friendlysmp.core.features.creativeitemcontrol.commands.CICCommand;
+import com.friendlysmp.core.features.creativeitemcontrol.listeners.DispenserListener;
+import com.friendlysmp.core.features.creativeitemcontrol.listeners.InventoryListener;
+import com.friendlysmp.core.features.creativeitemcontrol.managers.ConfigManager;
+import com.friendlysmp.core.features.creativeitemcontrol.managers.ExcludedItemManager;
+import com.friendlysmp.core.features.creativeitemcontrol.managers.MessageManager;
+import org.bukkit.event.HandlerList;
 
-import java.util.*;
+import java.io.File;
 
 public class CreativeFeature implements Feature {
     private final FriendlyCorePlugin plugin;
-    // Config options
-    public boolean attributesEnabled;
-    public boolean enchantmentsEnabled;
-    public boolean potionsEnabled;
-    public boolean componentsEnabled;
-    public List<DataComponentType> resolvedComponents;
-    public boolean enchantmentsAllowIncompatible;
-    public AttributeAction attributesAction;
-    public EnchantAction enchantmentsAction;
-    public Set<String> worlds;
-    public boolean worldsBlacklist;
-    public boolean playerAlerts;
-    // Excluded items
-    private Map<String, ItemStack> excludedItems;
-    private CreativeExcludedItemStore excludedItemStore;
-
-    private final Map<String, Long> giveCooldowns = new HashMap<>();
-    public long giveCooldownSeconds;
-
-
-    private final Map<Material, ItemMeta> defaultMetaCache = new EnumMap<>(Material.class);
-    private final Map<Material, ItemStack> defaultItemCache = new EnumMap<>(Material.class);
-    private CreativeItemListener listener;
-
+    private ConfigManager configManager;
+    private ExcludedItemManager excludedItemManager;
+    private MessageManager messageManager;
+    private InventoryListener inventoryListener;
+    private DispenserListener dispenserListener;
 
     public CreativeFeature(FriendlyCorePlugin plugin) {
         this.plugin = plugin;
     }
 
-
-    public void loadConfigCache() {
-        attributesEnabled = plugin.getConfig().getBoolean("creativeitemcontrol.attributes.enabled");
-        enchantmentsEnabled = plugin.getConfig().getBoolean("creativeitemcontrol.enchantments.enabled");
-        potionsEnabled = plugin.getConfig().getBoolean("creativeitemcontrol.potions.enabled");
-        attributesAction = AttributeAction.valueOf(plugin.getConfig().getString("creativeitemcontrol.attributes.action", "REMOVE"));
-        enchantmentsAction = EnchantAction.valueOf(plugin.getConfig().getString("creativeitemcontrol.enchantments.action", "REMOVE"));
-        enchantmentsAllowIncompatible = plugin.getConfig().getBoolean("creativeitemcontrol.enchantments.allow-incompatible");
-        worlds = new HashSet<>(plugin.getConfig().getStringList("creativeitemcontrol.config.worlds"));
-        worldsBlacklist = plugin.getConfig().getBoolean("creativeitemcontrol.config.blacklist");
-        playerAlerts = plugin.getConfig().getBoolean("creativeitemcontrol.config.playeralerts");
-        giveCooldownSeconds = plugin.getConfig().getLong("creativeitemcontrol.config.give-cooldown", 0);
-        componentsEnabled = plugin.getConfig().getBoolean("creativeitemcontrol.components.enabled");
-
-        resolvedComponents = new ArrayList<>();
-        for (String name : plugin.getConfig().getStringList("creativeitemcontrol.components.blocked")) {
-            NamespacedKey key = NamespacedKey.fromString(name);
-            if (key==null) continue;
-            DataComponentType type = Registry.DATA_COMPONENT_TYPE.get(key);
-            if (type == null) continue;
-            resolvedComponents.add(type);
-        }
-
-    }
-
     @Override
-    public String id() {return "creative-item-control";}
-
-    public ItemStack getDefaultItem(Material type) {
-        return defaultItemCache.computeIfAbsent(type, t -> new ItemStack(t, 1));
+    public String id() {
+        return "creativeitemcontrol";
     }
 
     @Override
     public void enable() {
-        loadConfigCache();
-        listener = new CreativeItemListener(this);
-        plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+        configManager = new ConfigManager(this);
+        configManager.load();
+        excludedItemManager = new ExcludedItemManager(this);
+        excludedItemManager.loadAll();
+        messageManager = new MessageManager(this);
+        dispenserListener = new DispenserListener(this);
+        inventoryListener = new InventoryListener(this);
 
-        var cicCmd = Objects.requireNonNull(plugin.getCommand("cic"));
-        CreativeCommand cicExecutor = new CreativeCommand(plugin, this);
-        cicCmd.setExecutor(cicExecutor);
-        cicCmd.setTabCompleter(cicExecutor);
+        plugin.getServer().getPluginManager().registerEvents(inventoryListener, plugin);
+        plugin.getServer().getPluginManager().registerEvents(dispenserListener, plugin);
 
-
-            excludedItemStore = new CreativeExcludedItemStore(plugin);
-        excludedItems = excludedItemStore.loadAll();
+        var cmd = plugin.getCommand("cic");
+        if (cmd != null) {
+            CICCommand cicCommand = new CICCommand(this);
+            cmd.setExecutor(cicCommand);
+            cmd.setTabCompleter(cicCommand);
+        }
     }
 
     @Override
     public void disable() {
-        if (listener != null) {
-            org.bukkit.event.HandlerList.unregisterAll(listener);
-            listener = null;
-        }
-        Objects.requireNonNull(plugin.getCommand("cic")).setExecutor(null);
-        defaultMetaCache.clear();
+        HandlerList.unregisterAll(dispenserListener);
+        HandlerList.unregisterAll(inventoryListener);
     }
 
     @Override
     public void reload() {
         plugin.reloadConfig();
-        loadConfigCache();
-        excludedItems = excludedItemStore.loadAll();
+        configManager.load();
+        excludedItemManager.loadAll();
     }
 
-    public ItemMeta getDefaultMeta(Material type) {
-        return defaultMetaCache.computeIfAbsent(type, t -> new ItemStack(t, 1).getItemMeta());
-    }
-
-    public void storeExcludedItem(String id, ItemStack item) {
-    excludedItems.put(id, item.clone());
-    excludedItemStore.save(id, item);
-    }
-
-    public void removeExcludedItem(String id) {
-        excludedItems.remove(id);
-        excludedItemStore.remove(id);
-    }
-
-    public ItemStack getExcludedItem(String id) {
-        return excludedItems.get(id);
-    }
-
-    public Map<String, ItemStack> getExcludedItems() {
-        return Collections.unmodifiableMap(excludedItems);
-    }
-
-    public boolean isExcluded(ItemStack item) {
-        return excludedItems.values().stream().anyMatch(e -> e.isSimilar(item));
-    }
-
-    public boolean isOnGiveCooldown(UUID targetId, String itemId) {
-        String key = targetId + ":" + itemId;
-        Long last = giveCooldowns.get(key);
-        if (last == null) return false;
-        return (System.currentTimeMillis() - last) < giveCooldownSeconds * 1000L;
-    }
-    public long getGiveCooldownRemaining(UUID targetId, String itemId) {
-        String key = targetId + ":" + itemId;
-        Long last = giveCooldowns.get(key);
-        return giveCooldownSeconds - (System.currentTimeMillis() - last) / 1000L;
-    }
-    public void recordGive(UUID targetId, String itemId) {
-        giveCooldowns.put(targetId + ":" + itemId, System.currentTimeMillis());
-    }
-
-
-
+    public FriendlyCorePlugin getPlugin() { return plugin; }
+    public File getDataFolder() { return new File(plugin.getDataFolder(), "CreativeItemControl"); }
+    public ConfigManager getConfigManager() { return configManager; }
+    public ExcludedItemManager getExcludedItemManager() { return excludedItemManager; }
+    public MessageManager getMessageManager() { return messageManager; }
 }
