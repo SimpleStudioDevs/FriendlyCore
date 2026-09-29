@@ -1,0 +1,48 @@
+# CommandMaker - custom commands for FriendlyCore
+# Most of this can be edited in-game with /cm help
+#
+# Each command runs its actions in order. Action types:
+#   MESSAGE: / BROADCAST:   send text to the sender / everyone (MiniMessage, &-codes and [text](url) links)
+#   CONSOLE: / PLAYER:      run a command as console / as the sender
+#   SOUND: / SOUNDALL:      play a sound (e.g. minecraft:entity.player.levelup) to the sender / everyone
+# Optional per command: permission, aliases, args (type: STRING/PLAYER/INT/FLOAT, options, placeholder)
+# Placeholders: {argName} {player} {sender} {onlineplayers} {maxplayers}; with a PLAYER arg: {target} {x} {y} {z} {world} {displayname}
+
+enabled-commands:
+  - website
+  - limits
+  - store
+  - map
+  - ticket
+  - support
+  - blockbyblock
+
+commands:
+  website:
+    aliases: []
+    actions:
+      - "MESSAGE:&bVisit our website at&f: <click:open_url:'friendlysmp.com'>friendlysmp.com</click>"
+  limits:
+    actions:
+      - "MESSAGE:&bFor a full list of limits visit <click:open_url:'http://friendlysmp.com/limits'>http://friendlysmp.com/limits</click>"
+  store:
+    actions:
+      - "MESSAGE:&bVisit our webstore at&f <click:open_url:'https://friendlysmp.com/shop'>friendlysmp.com/shop</click>"
+  map:
+    actions:
+      - "MESSAGE:&bView our World Map at&f: <click:open_url:'friendlysmp.com/map'>friendlysmp.com/map</click>"
+  ticket:
+    actions:
+      - "MESSAGE:&aReceive support from a staff member at&f <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
+  support:
+    actions:
+      - "MESSAGE:&bReceive support from a staff member at&f: <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
+  blockbyblock:
+    aliases:
+      - bbb
+    actions:
+      - "MESSAGE:<yellow>To check out our latest BBB challenge and it's rules, go here:"
+      - "MESSAGE:<green><click:open_url:'friendlysmp.com/blockbyblock'>friendlysmp.com/blockbyblock</click>"
+  ping:
+    actions:
+      - 'MESSAGE:<gray>Ping: %player_colored_ping%<gray>ms'

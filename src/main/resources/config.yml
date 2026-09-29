@@ -53,46 +53,6 @@ tokens:
 
 
 
-commandmaker:
-  enabled-commands:
-    - website
-    - limits
-    - store
-    - map
-    - ticket
-    - support
-    - blockbyblock
-
-  commands:
-    website:
-      aliases: []
-      message:
-        - "&bVisit our website at&f: <click:open_url:'friendlysmp.com'>friendlysmp.com</click>"
-    limits:
-      message:
-        - "&bFor a full list of limits visit <click:open_url:'http://friendlysmp.com/limits'>http://friendlysmp.com/limits</click>"
-    store:
-      message:
-        - "&bVisit our webstore at&f <click:open_url:'https://friendlysmp.com/shop'>friendlysmp.com/shop</click>"
-    map:
-      message:
-        - "&bView our World Map at&f: <click:open_url:'friendlysmp.com/map'>friendlysmp.com/map</click>"
-    ticket:
-      message:
-        - "&aReceive support from a staff member at&f <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
-    support:
-      message:
-        - "&bReceive support from a staff member at&f: <click:open_url:'friendlysmp.com/tickets'>friendlysmp.com/tickets</click>"
-    blockbyblock:
-      aliases:
-        - bbb
-      message:
-        - "<yellow>To check out our latest BBB challenge and it's rules, go here:"
-        - "<green><click:open_url:'friendlysmp.com/blockbyblock'>friendlysmp.com/blockbyblock</click>"
-    ping:
-      message:
-        - '<gray>Ping: %player_colored_ping%<gray>ms'
-
 player-broadcast:
   economy:
     cost: 150

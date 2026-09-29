@@ -21,7 +21,8 @@ commands:
     usage: /cic <reload|list|store>
   commandmaker:
     description: CommandMaker admin command
-    usage: /commandmaker reload
+    usage: /commandmaker help
+    aliases: [cm]
   pbroadcast:
     description: Send a paid broadcast message
     usage: "/pbroadcast <message>"
