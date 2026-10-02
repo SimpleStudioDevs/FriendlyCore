@@ -1,24 +1,25 @@
 package com.friendlysmp.core.features.achievementguard;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AchievementGuardFeature implements Feature, CommandExecutor {
-    private final FriendlyCorePlugin plugin;
+public class AchievementGuardFeature extends Feature implements CommandExecutor {
+    private final FeatureConfig config;
     private Set<String> blockedWorlds;
 
     public AchievementGuardFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/achievementguard.yml");
     }
 
     @Override
@@ -30,7 +31,7 @@ public class AchievementGuardFeature implements Feature, CommandExecutor {
     public void enable() {
         reloadBlockedWorlds();
 
-        plugin.getServer().getPluginManager().registerEvents(new AchievementListener(this), plugin);
+        registerListener(new AchievementListener(this));
 
         if (plugin.getCommand("achievementguard") != null) {
             plugin.getCommand("achievementguard").setExecutor(this);
@@ -39,7 +40,6 @@ public class AchievementGuardFeature implements Feature, CommandExecutor {
 
     @Override
     public void disable() {
-        HandlerList.unregisterAll(plugin);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class AchievementGuardFeature implements Feature, CommandExecutor {
     }
 
     public void reloadBlockedWorlds() {
-        plugin.reloadConfig();
-        List<String> list = plugin.getConfig().getStringList("achievement-guard.BLOCKED-WORLDS");
+        config.load();
+        List<String> list = config.get().getStringList("BLOCKED-WORLDS");
 
         blockedWorlds = list.stream()
                 .filter(Objects::nonNull)

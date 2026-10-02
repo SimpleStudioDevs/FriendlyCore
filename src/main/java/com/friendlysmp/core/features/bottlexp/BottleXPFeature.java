@@ -1,15 +1,16 @@
 package com.friendlysmp.core.features.bottlexp;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
+import org.bukkit.configuration.Configuration;
 
-import java.util.List;
-
-public class BottleXPFeature implements Feature {
-    private final FriendlyCorePlugin plugin;
+public class BottleXPFeature extends Feature {
+    private final FeatureConfig config;
 
     public BottleXPFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/bottlexp.yml");
     }
 
     @Override
@@ -19,14 +20,16 @@ public class BottleXPFeature implements Feature {
 
     @Override
     public void enable() {
+        config.load();
 
-        plugin.getServer().getPluginManager().registerEvents(new BottleListener(plugin), plugin);
+        registerListener(new BottleListener(this));
 
         var bottleXPCommand = plugin.getCommand("bottlexp");
 
         if (bottleXPCommand != null) {
-            bottleXPCommand.setExecutor(new BottleXPCommand(plugin));
-            bottleXPCommand.setTabCompleter(new BottleXPCommand(plugin));
+            BottleXPCommand command = new BottleXPCommand(this);
+            bottleXPCommand.setExecutor(command);
+            bottleXPCommand.setTabCompleter(command);
         }
     }
 
@@ -37,9 +40,14 @@ public class BottleXPFeature implements Feature {
 
     @Override
     public void reload() {
-
+        config.load();
     }
 
+    public Configuration getConfig() {
+        return config.get();
+    }
 
-
+    public FriendlyCorePlugin getPlugin() {
+        return plugin;
+    }
 }

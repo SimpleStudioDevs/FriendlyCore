@@ -1,32 +1,36 @@
 package com.friendlysmp.core.features.chatpatrol.managers;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
-import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
+import com.friendlysmp.core.config.FeatureConfig;
 
 import java.util.List;
 
 public class ConfigManager {
-    private final FriendlyCorePlugin plugin;
+    private static final String RESOURCE_PATH = "FeatureConfigs/ChatPatrol/config.yml";
+
+    private final FeatureConfig config;
+
     public ConfigManager(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        this.config = new FeatureConfig(plugin, RESOURCE_PATH);
     }
+
     public void reload() {
-        plugin.reloadConfig();
+        config.load();
     }
 
 
     public boolean isWordFilterEnabled() {
-        return plugin.getConfig().getBoolean("chat-patrol.ENABLE-WORD-FILTER", true);
+        return config.get().getBoolean("ENABLE-WORD-FILTER", true);
     }
 
     public List<String> getBlacklistedWords() {
-        return plugin.getConfig().getStringList("chat-patrol.BLACKLISTED-WORDS");
+        return config.get().getStringList("BLACKLISTED-WORDS");
     }
 
 
     public String getBlacklistedWordsCommand() {
-        return plugin.getConfig().getString(
-                "chat-patrol.PUNISHMENTS.BLACKLISTED-WORDS-COMMAND",
+        return config.get().getString(
+                "PUNISHMENTS.BLACKLISTED-WORDS-COMMAND",
                 "ban {player} You were banned for using inappropriate language!"
         );
     }

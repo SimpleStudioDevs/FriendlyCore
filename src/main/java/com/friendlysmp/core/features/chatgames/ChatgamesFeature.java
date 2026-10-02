@@ -1,17 +1,20 @@
 package com.friendlysmp.core.features.chatgames;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import com.friendlysmp.core.schedulers.Schedulers;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.Configuration;
 
-public class ChatgamesFeature implements Feature {
-    private final FriendlyCorePlugin plugin;
+public class ChatgamesFeature extends Feature {
     private final Schedulers schedulers;
+    private final FeatureConfig config;
+
     public ChatgamesFeature(FriendlyCorePlugin plugin, Schedulers schedulers) {
-        this.plugin = plugin;
+        super(plugin);
         this.schedulers = schedulers;
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/chatgames.yml");
     }
 
     @Override
@@ -21,6 +24,7 @@ public class ChatgamesFeature implements Feature {
 
     @Override
     public void enable() {
+        config.load();
         var command = plugin.getCommand("pcg");
         if (command != null) {
             ChatgamesCommand c = new ChatgamesCommand(this);
@@ -36,7 +40,7 @@ public class ChatgamesFeature implements Feature {
 
     @Override
     public void reload() {
-
+        config.load();
     }
 
     public Economy getEconomy() {
@@ -44,7 +48,7 @@ public class ChatgamesFeature implements Feature {
     }
 
     public Configuration getConfig() {
-        return plugin.getConfig();
+        return config.get();
     }
 
     public FriendlyCorePlugin getPlugin() {

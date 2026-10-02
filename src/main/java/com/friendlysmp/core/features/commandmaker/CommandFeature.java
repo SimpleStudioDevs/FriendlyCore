@@ -1,6 +1,7 @@
 package com.friendlysmp.core.features.commandmaker;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import com.friendlysmp.core.features.commandmaker.arguments.ArgsDefinition;
 import com.friendlysmp.core.features.commandmaker.commandcreation.CustomCommand;
@@ -11,28 +12,22 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 
-public class CommandFeature implements Feature {
-    public static final String FILE_NAME = "commandmaker.yml";
+public class CommandFeature extends Feature {
+    public static final String FILE_NAME = "FeatureConfigs/commandmaker.yml";
     public static final String ENABLED_COMMANDS = "enabled-commands";
     public static final String COMMANDS = "commands";
     public static final List<String> ACTION_PREFIXES = List.of("BROADCAST:", "MESSAGE:", "PLAYER:", "CONSOLE:", "SOUND:", "SOUNDALL:");
 
-    private final FriendlyCorePlugin plugin;
-    private final File file;
     private final List<CustomCommand> registeredCommands = new ArrayList<>();
-    private YamlConfiguration config = new YamlConfiguration();
+    private final FeatureConfig config;
     private boolean papi;
 
     public CommandFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), FILE_NAME);
+        super(plugin);
+        this.config = new FeatureConfig(plugin, FILE_NAME, false);
     }
 
     @Override
@@ -47,7 +42,7 @@ public class CommandFeature implements Feature {
             plugin.getLogger().info("PlaceholderAPI not detected, CommandMaker PAPI placeholders will be in plain-text!");
         }
 
-        loadConfig();
+        config.load();
         registerCommands();
 
         PluginCommand adminCommand = Objects.requireNonNull(plugin.getCommand("commandmaker"));
@@ -64,12 +59,12 @@ public class CommandFeature implements Feature {
     @Override
     public void reload() {
         unregisterCommands();
-        loadConfig();
+        config.load();
         registerCommands();
     }
 
     public void saveAndReload() {
-        saveConfig();
+        config.save();
         reload();
     }
 
@@ -78,7 +73,7 @@ public class CommandFeature implements Feature {
     }
 
     public FileConfiguration getConfig() {
-        return config;
+        return config.get();
     }
 
     public boolean isPapiEnabled() {
@@ -97,12 +92,12 @@ public class CommandFeature implements Feature {
     private void registerCommands() {
         CommandMap commandMap = Bukkit.getServer().getCommandMap();
         Map<String, Command> knownCommands = commandMap.getKnownCommands();
-        for (String cmdName : config.getStringList(ENABLED_COMMANDS)) {
+        for (String cmdName : getConfig().getStringList(ENABLED_COMMANDS)) {
             // Define command information and details
             String path = commandPath(cmdName);
-            List<String> aliases = config.getStringList(path + ".aliases");
-            String permission = config.getString(path + ".permission");
-            List<String> actions = config.getStringList(path + ".actions");
+            List<String> aliases = getConfig().getStringList(path + ".aliases");
+            String permission = getConfig().getString(path + ".permission");
+            List<String> actions = getConfig().getStringList(path + ".actions");
 
             actions.removeIf(action -> {
                 int colonIndex = action.indexOf(":");
@@ -113,7 +108,7 @@ public class CommandFeature implements Feature {
                 return false;
             });
 
-            ConfigurationSection argsSection = config.getConfigurationSection(path + ".args");
+            ConfigurationSection argsSection = getConfig().getConfigurationSection(path + ".args");
             List<ArgsDefinition> argDefs = new ArrayList<>();
             if (argsSection != null) {
                 for (String argName : argsSection.getKeys(false)) {
@@ -153,21 +148,6 @@ public class CommandFeature implements Feature {
             }
         }
         registeredCommands.clear();
-    }
-
-    private void loadConfig() {
-        if (!file.exists()) {
-            plugin.saveResource(FILE_NAME, false);
-        }
-        config = YamlConfiguration.loadConfiguration(file);
-    }
-
-    private void saveConfig() {
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save " + FILE_NAME, e);
-        }
     }
 
 }

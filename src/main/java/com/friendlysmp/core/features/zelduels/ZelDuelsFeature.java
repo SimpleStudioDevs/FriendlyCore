@@ -8,14 +8,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
-public class ZelDuelsFeature implements Feature, Listener {
-    private final FriendlyCorePlugin plugin;
+public class ZelDuelsFeature extends Feature implements Listener {
 
     public ZelDuelsFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
@@ -30,13 +28,12 @@ public class ZelDuelsFeature implements Feature, Listener {
             return;
         }
 
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        registerListener(this);
 
     }
 
     @Override
     public void disable() {
-        HandlerList.unregisterAll(this);
     }
 
     @Override

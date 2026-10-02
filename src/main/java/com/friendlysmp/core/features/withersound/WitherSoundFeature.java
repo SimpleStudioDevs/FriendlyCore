@@ -1,5 +1,7 @@
 package com.friendlysmp.core.features.withersound;
 
+import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import com.friendlysmp.core.placeholder.FriendlyCoreExpansion;
 import com.friendlysmp.core.placeholder.PlaceholderProvider;
@@ -7,32 +9,33 @@ import com.friendlysmp.core.storage.PlayerSettingsStore;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public final class WitherSoundFeature implements Feature, PlaceholderProvider {
+public final class WitherSoundFeature extends Feature implements PlaceholderProvider {
 
-    private final JavaPlugin plugin;
     private final PlayerSettingsStore store;
+    private final FeatureConfig config;
 
     private PacketListenerAbstract registered; // only one listener now
 
-    public WitherSoundFeature(JavaPlugin plugin, PlayerSettingsStore store) {
-        this.plugin = plugin;
+    public WitherSoundFeature(FriendlyCorePlugin plugin, PlayerSettingsStore store) {
+        super(plugin);
         this.store = store;
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/withersound.yml");
     }
 
     @Override public String id() { return "wither-sound"; }
 
     @Override
     public void enable() {
+        config.load();
         PluginCommand cmd = plugin.getCommand("withersound");
         if (cmd != null) {
             WitherSoundCommand exec = new WitherSoundCommand(store);
             cmd.setExecutor(exec);
             cmd.setTabCompleter(exec);
         }
-        org.bukkit.Bukkit.getPluginManager().registerEvents(new WitherSoundJoinListener(store), plugin);
-        boolean debug = plugin.getConfig().getBoolean("features.wither-sound.debug", false);
+        registerListener(new WitherSoundJoinListener(store));
+        boolean debug = config.get().getBoolean("debug", false);
 
         registered = new WitherEffectPacketListener(store, debug);
         PacketEvents.getAPI().getEventManager().registerListener(registered);
@@ -57,5 +60,5 @@ public final class WitherSoundFeature implements Feature, PlaceholderProvider {
     }
 
     @Override
-    public void reload() { }
+    public void reload() { config.load(); }
 }

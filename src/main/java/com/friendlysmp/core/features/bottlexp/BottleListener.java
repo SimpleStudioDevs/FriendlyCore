@@ -19,12 +19,14 @@ import java.util.List;
 
 public class BottleListener implements Listener {
 
+    private final BottleXPFeature feature;
     private final FriendlyCorePlugin plugin;
     private final NamespacedKey xpPointsKey;
     private final NamespacedKey oldPointsKey = new NamespacedKey("stowablexp", "stored_xp_points");
 
-    public BottleListener(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+    public BottleListener(BottleXPFeature feature) {
+        this.feature = feature;
+        this.plugin = feature.getPlugin();
         this.xpPointsKey = new NamespacedKey(plugin, "stored_xp_points");
     }
 
@@ -91,7 +93,7 @@ public class BottleListener implements Listener {
             setItemInHand(player, hand, null); // clear that hand
         }
 
-        boolean debug = plugin.getConfig().getBoolean("debug-mode", false);
+        boolean debug = feature.getConfig().getBoolean("debug", false);
 
         addPointsWithMending(player, amountToAdd);
 
@@ -117,7 +119,7 @@ public class BottleListener implements Listener {
     }
 
     private double repairWithMending(Player player, double xp) {
-        boolean debug = plugin.getConfig().getBoolean("features.bottle-xp.debug-mode", false);
+        boolean debug = feature.getConfig().getBoolean("debug", false);
         List<ItemStack> mendable = new ArrayList<>();
         for (ItemStack armor : player.getInventory().getArmorContents()) {
             if (armor != null && armor.containsEnchantment(Enchantment.MENDING)) mendable.add(armor);
@@ -158,7 +160,7 @@ public class BottleListener implements Listener {
         item.setDurability(newDamage);
         double xpUsed = repairAmount / 2.0D;
 
-        if (plugin.getConfig().getBoolean("features.bottle-xp.debug-mode", false))
+        if (feature.getConfig().getBoolean("debug", false))
             plugin.getLogger().info(
                     "(DEBUG) Repairing item " + String.valueOf(item.getType())
                             + ": damage " + currentDamage + " -> " + newDamage
@@ -211,7 +213,7 @@ public class BottleListener implements Listener {
     public boolean isRedeemBlockedInWorld(String worldname) {
         if (worldname == null) return false;
 
-        List<String> blocked = plugin.getConfig().getStringList( "bottle-xp.blocked-redeem-worlds");
+        List<String> blocked = feature.getConfig().getStringList("blocked-redeem-worlds");
         if (blocked == null || blocked.isEmpty()) return false;
 
         for (String w : blocked) {

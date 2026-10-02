@@ -1,27 +1,27 @@
 package com.friendlysmp.core.features.tokens;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import com.friendlysmp.core.storage.PlayerSettingsStore;
-import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-public final class TokenFeature implements Feature, Listener {
-    private final FriendlyCorePlugin plugin;
+public final class TokenFeature extends Feature implements Listener {
     private final PlayerSettingsStore playerSettings;
+    private final FeatureConfig config;
 
     private TokenDao dao;
     private TokenService service;
     private TokenCommand command;
 
     public TokenFeature(FriendlyCorePlugin plugin, PlayerSettingsStore playerSettings) {
-        this.plugin = plugin;
+        super(plugin);
         this.playerSettings = playerSettings;
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/tokens.yml");
     }
 
     @Override
@@ -31,13 +31,14 @@ public final class TokenFeature implements Feature, Listener {
 
     @Override
     public void enable() {
+        config.load();
         try {
             this.dao = new TokenDao(playerSettings.dataSource());
             this.dao.init();
-            this.service = new TokenService(plugin, dao);
+            this.service = new TokenService(plugin, config, dao);
             this.command = new TokenCommand(plugin, service);
 
-            Bukkit.getPluginManager().registerEvents(this, plugin);
+            registerListener(this);
 
             PluginCommand token = plugin.getCommand("token");
             if (token != null) {
@@ -53,12 +54,11 @@ public final class TokenFeature implements Feature, Listener {
 
     @Override
     public void disable() {
-        HandlerList.unregisterAll(this);
     }
 
     @Override
     public void reload() {
-        // config is re-read live through plugin.getConfig()
+        config.load();
     }
 
     @EventHandler
@@ -66,5 +66,6 @@ public final class TokenFeature implements Feature, Listener {
         Player player = event.getPlayer();
         plugin.getLogger().info("[TOKENS] TokenFeature saw join for " + player.getName());
         service.handleMonthlyJoin(player);
+        service.handleOfflineTokens(player);
     }
 }

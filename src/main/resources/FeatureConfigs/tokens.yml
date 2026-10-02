@@ -1,0 +1,12 @@
+claim-until-day: 7
+excluded-worlds:
+  - builds
+  - vip
+  - flat
+ranks:
+  vip:
+    permission: tokens.vip
+    amount: 3
+  legend:
+    permission: tokens.legend
+    amount: 5

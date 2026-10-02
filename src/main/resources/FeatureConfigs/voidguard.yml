@@ -1,0 +1,8 @@
+locations:
+  spawn:
+    world: spawn
+    x: 132.5
+    y: 63.0
+    z: -3.5
+    yaw: -0.057115912
+    pitch: 9.521339

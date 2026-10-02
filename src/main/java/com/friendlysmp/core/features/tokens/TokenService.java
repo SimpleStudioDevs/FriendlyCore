@@ -1,9 +1,13 @@
 package com.friendlysmp.core.features.tokens;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -18,10 +22,12 @@ import java.util.Objects;
 
 public final class TokenService {
     private final FriendlyCorePlugin plugin;
+    private final FeatureConfig config;
     private final TokenDao dao;
 
-    public TokenService(FriendlyCorePlugin plugin, TokenDao dao) {
+    public TokenService(FriendlyCorePlugin plugin, FeatureConfig config, TokenDao dao) {
         this.plugin = plugin;
+        this.config = config;
         this.dao = dao;
     }
 
@@ -85,7 +91,7 @@ public final class TokenService {
         }
     }
 
-    public GiveResult handleAdminGive(Player player, int amount) {
+    public GiveResult handleAdminGive(OfflinePlayer player, int amount) {
         try {
             boolean success = giveShopToken(player, amount, true);
             return success ? GiveResult.GIVEN_NOW : GiveResult.STORED_FOR_CLAIM;
@@ -100,12 +106,12 @@ public final class TokenService {
     }
 
     public int getClaimUntilDay() {
-        int day = plugin.getConfig().getInt("tokens.claim-until-day", 7);
+        int day = config.get().getInt("claim-until-day", 7);
         return Math.max(1, Math.min(31, day));
     }
 
     public int getHighestRewardAmount(Player player) {
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("tokens.ranks");
+        ConfigurationSection section = config.get().getConfigurationSection("ranks");
         if (section == null) {
             return 0;
         }
@@ -136,7 +142,7 @@ public final class TokenService {
         return canCarry(player.getInventory(), amount, tokenDisplayName());
     }
 
-    private boolean giveShopToken(Player player, int amount, boolean storeIfFailed) throws Exception {
+    private boolean giveShopToken(OfflinePlayer target, int amount, boolean storeIfFailed) throws Exception {
         ItemStack item = new ItemStack(Material.GOLD_NUGGET, amount);
         ItemMeta meta = item.getItemMeta();
         Component name = tokenDisplayName();
@@ -146,6 +152,13 @@ public final class TokenService {
             meta.addEnchant(Enchantment.LOYALTY, 1, true);
             item.setItemMeta(meta);
         }
+
+        if (!target.isOnline()) {
+            dao.addPendingTokens(target.getUniqueId(), amount);
+            return true;
+        }
+
+        Player player = (Player) target;
 
         if (!canCarry(player.getInventory(), amount, name) || isExcludedWorld(player.getWorld())) {
             if (storeIfFailed) {
@@ -159,7 +172,7 @@ public final class TokenService {
     }
 
     private boolean isExcludedWorld(World world) {
-        List<String> excluded = plugin.getConfig().getStringList("tokens.excluded-worlds");
+        List<String> excluded = config.get().getStringList("excluded-worlds");
         for (String name : excluded) {
             if (name.equalsIgnoreCase(world.getName())) {
                 return true;
@@ -218,5 +231,18 @@ public final class TokenService {
         }
 
         return item;
+    }
+
+    public void handleOfflineTokens(Player player) {
+        try {
+            if (dao.getPendingTokens(player.getUniqueId()) > 0) {
+                Bukkit.getGlobalRegionScheduler().runDelayed(plugin,st -> {
+                    player.sendMessage(Component.text("You have tokens available to claim! Use /token claim to receive them", NamedTextColor.YELLOW));
+                }, 20);
+
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("[TOKENS] Could not see offline tokens for " + player.getName());
+        }
     }
 }

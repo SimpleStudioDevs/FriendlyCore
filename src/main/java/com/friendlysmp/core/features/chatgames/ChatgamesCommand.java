@@ -39,7 +39,7 @@ public class ChatgamesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        int price = feature.getConfig().getInt("chatgames.price");
+        int price = feature.getConfig().getInt("price");
 
         if (args.length < 2) {
             sender.sendMessage(Component.text("(Price to use: " + price + " diamonds) Usage: /pcg <question in quotes> <answer in quotes>", NamedTextColor.YELLOW));
@@ -47,7 +47,7 @@ public class ChatgamesCommand implements CommandExecutor, TabCompleter {
         }
 
         Economy econ = feature.getEconomy();
-        long cooldown = feature.getConfig().getLong("chatgames.cooldown");
+        long cooldown = feature.getConfig().getLong("cooldown");
         long now = System.currentTimeMillis();
 
         if (cooldowns.containsKey(player.getUniqueId())) {

@@ -1,16 +1,16 @@
 package com.friendlysmp.core.features.sleepcap;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import org.bukkit.configuration.Configuration;
-import org.bukkit.event.HandlerList;
 
-public class SleepCapFeature implements Feature {
-    private final FriendlyCorePlugin plugin;
-    private EnterBedListener enterBedListener;
+public class SleepCapFeature extends Feature {
+    private final FeatureConfig config;
 
     public SleepCapFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/sleepcap.yml");
     }
 
     @Override
@@ -20,21 +20,20 @@ public class SleepCapFeature implements Feature {
 
     @Override
     public void enable() {
-        this.enterBedListener = new EnterBedListener(this);
-        plugin.getServer().getPluginManager().registerEvents(enterBedListener, plugin);
+        config.load();
+        registerListener(new EnterBedListener(this));
     }
 
     @Override
     public void disable() {
-        HandlerList.unregisterAll(enterBedListener);
     }
 
     @Override
     public void reload() {
-
+        config.load();
     }
 
     public Configuration getConfig() {
-        return plugin.getConfig();
+        return config.get();
     }
 }

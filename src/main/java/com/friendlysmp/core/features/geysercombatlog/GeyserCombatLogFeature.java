@@ -6,11 +6,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-public class GeyserCombatLogFeature implements Feature, Listener {
-    private final FriendlyCorePlugin plugin;
+public class GeyserCombatLogFeature extends Feature implements Listener {
 
     public GeyserCombatLogFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
@@ -20,7 +19,7 @@ public class GeyserCombatLogFeature implements Feature, Listener {
 
     @Override
     public void enable() {
-        this.plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        registerListener(this);
     }
 
     @Override

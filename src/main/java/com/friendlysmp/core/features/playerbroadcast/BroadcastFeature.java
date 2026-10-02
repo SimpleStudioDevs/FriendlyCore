@@ -1,27 +1,27 @@
 package com.friendlysmp.core.features.playerbroadcast;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 import javax.annotation.Nullable;
-import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class BroadcastFeature implements Feature {
+public class BroadcastFeature extends Feature {
     private Economy economy;
-    private final FriendlyCorePlugin plugin;
     private final Map<UUID, long[]> freeUseTracker = new HashMap<>();
+    private final FeatureConfig config;
 
     public BroadcastFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/playerbroadcast.yml");
     }
 
     @Override
@@ -31,11 +31,12 @@ public class BroadcastFeature implements Feature {
 
     @Override
     public void enable() {
+        config.load();
         MiniMessage miniMessage = MiniMessage.miniMessage();
 
         this.economy = plugin.getEconomy();
 
-        MessageUtil.init(plugin, miniMessage);
+        MessageUtil.init(this, miniMessage);
 
         BroadcastCommand broadcastCommand = new BroadcastCommand(this);
 
@@ -57,7 +58,7 @@ public class BroadcastFeature implements Feature {
 
     @Override
     public void reload() {
-        plugin.reloadConfig();
+        config.load();
         freeUseTracker.clear();
     }
 
@@ -65,13 +66,13 @@ public class BroadcastFeature implements Feature {
     public Economy getEconomy() {
         return economy;
     }
-    public Configuration getConfig() {return plugin.getConfig(); }
+    public Configuration getConfig() { return config.get(); }
 
     public int consumeFreeUse(UUID uuid, String group) {
         if (group == null) return 0;
 
-        long resetMs = plugin.getConfig().getLong("player-broadcast.free-uses." + group + ".interval", 60) * 60_000L;
-        int maxFree = plugin.getConfig().getInt("player-broadcast.free-uses." + group + ".count");
+        long resetMs = config.get().getLong("free-uses." + group + ".interval", 60) * 60_000L;
+        int maxFree = config.get().getInt("free-uses." + group + ".count");
 
         long[] entry = freeUseTracker.get(uuid);
         long now = System.currentTimeMillis();
@@ -90,7 +91,7 @@ public class BroadcastFeature implements Feature {
     }
 
     public @Nullable String resolveGroup(Player player) {
-        ConfigurationSection groups = plugin.getConfig().getConfigurationSection("player-broadcast.free-uses");
+        ConfigurationSection groups = config.get().getConfigurationSection("free-uses");
         if (groups == null) return null;
 
         for (String key : groups.getKeys(false)) {
@@ -103,8 +104,8 @@ public class BroadcastFeature implements Feature {
         String group = resolveGroup(player);
         if (group == null) return 0;
 
-        long resetMs = plugin.getConfig().getLong("player-broadcast.free-uses." + group + ".interval", 60) * 60_000L;
-        int maxFree = plugin.getConfig().getInt("player-broadcast.free-uses." + group + ".count");
+        long resetMs = config.get().getLong("free-uses." + group + ".interval", 60) * 60_000L;
+        int maxFree = config.get().getInt("free-uses." + group + ".count");
 
         long[] entry = freeUseTracker.get(player.getUniqueId());
         if (entry == null || System.currentTimeMillis() - entry[1] >= resetMs) return maxFree;
@@ -116,7 +117,7 @@ public class BroadcastFeature implements Feature {
         String group = resolveGroup(player);
         if (group == null) return "0 seconds";
 
-        long resetMs = plugin.getConfig().getLong("player-broadcast.free-uses." + group + ".interval", 60) * 60_000L;
+        long resetMs = config.get().getLong("free-uses." + group + ".interval", 60) * 60_000L;
 
         long[] entry = freeUseTracker.get(player.getUniqueId());
         if (entry == null) return "0 seconds";

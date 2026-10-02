@@ -71,7 +71,7 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
 
         String message = String.join(" ", args);
 
-        double cost = plugin.getConfig().getDouble("player-broadcast.economy.cost", 150.0);
+        double cost = plugin.getConfig().getDouble("economy.cost", 150.0);
         boolean usedFreeUse;
 
         if (!(plugin.remainingUses(player) > 0)) { // Check free uses before charging

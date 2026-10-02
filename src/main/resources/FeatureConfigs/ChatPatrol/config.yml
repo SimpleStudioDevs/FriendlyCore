@@ -1,0 +1,41 @@
+# WORD FILTER
+ENABLE-WORD-FILTER: true
+BLACKLISTED-WORDS:
+  - nigger
+  - nigga
+  - niggger
+  - nigggger
+  - niggggger
+  - nigggggger
+  - niggggggger
+  - niggggggggers
+  - -3417976300446998696
+  - 3417976300446998696
+  - faggot
+  - fag
+  - f@g
+  - f@ggot
+  - n1gger
+  - nlgger
+  - negger
+  - neygirs
+  - N!G5ERS
+  - niigger
+  - niiigger
+  - nigg@
+  - niggg@
+  - nigggg@
+  - n!gg@
+  - n!ggg@
+  - n!gggg@
+  - n!66er
+  - n!663r
+  - ni663r
+  - ni66er
+  - n!66@
+  - ni66@
+
+
+# COMMAND TO EXECUTE FOR PUNISHMENTS
+PUNISHMENTS:
+  BLACKLISTED-WORDS-COMMAND: "banip {player} You were banned for using inappropriate language!"
