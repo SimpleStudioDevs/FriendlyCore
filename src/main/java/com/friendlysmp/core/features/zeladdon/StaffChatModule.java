@@ -34,7 +34,7 @@ public class StaffChatModule implements ChatModule {
             String permKey = entry.getKey();
             String prefixStr = entry.getValue();
 
-            if (sender.hasPermission("zelchat.format." + permKey)) {
+            if (sender.isPermissionSet("zelchat.format." + permKey) && sender.hasPermission("zelchat.format." + permKey)) {
                 String resolvedPrefix = PlaceholderAPI.setPlaceholders(sender, prefixStr);
                 Component prefix = MiniMessage.miniMessage().deserialize(resolvedPrefix);
                 Component newMessage = prefix.append(chatMessage.getMessage());
