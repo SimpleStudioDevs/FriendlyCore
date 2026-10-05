@@ -31,3 +31,5 @@ features:
     enabled: true
   zelduels:
     enabled: true
+  hidearmor:
+    enabled: true

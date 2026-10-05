@@ -13,6 +13,9 @@ commands:
   withersound:
     description: Toggle the Wither death sound for yourself.
     usage: /withersound [toggle|on|off|status]
+  hidearmor:
+    description: Toggle whether other players can see your armor.
+    usage: /hidearmor [toggle|on|off|status]
   token:
     description: Token command
     usage: /token
