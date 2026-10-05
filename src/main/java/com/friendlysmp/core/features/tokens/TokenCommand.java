@@ -101,8 +101,8 @@ public final class TokenCommand implements TabExecutor {
             return true;
         }
 
-        Player target = Bukkit.getPlayerExact(args[0]);
-        if (target == null) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        if (!target.hasPlayedBefore()) {
             sender.sendMessage("§cPlayer not found: " + args[0]);
             return true;
         }
@@ -131,7 +131,8 @@ public final class TokenCommand implements TabExecutor {
         if (result == TokenService.GiveResult.STORED_FOR_CLAIM) {
             sender.sendMessage("§e" + target.getName() + " could not receive the token(s) right now, so they were stored for /token claim.");
             if (target.isOnline()) {
-                target.sendMessage("§eYou received " + amount + " token(s), but they were stored for claim because your inventory was full or you were in an excluded world. /token claim");
+                Player player = (Player) target;
+                player.sendMessage("§eYou received " + amount + " token(s), but they were stored for claim because your inventory was full or you were in an excluded world. /token claim");
             }
             return true;
         }

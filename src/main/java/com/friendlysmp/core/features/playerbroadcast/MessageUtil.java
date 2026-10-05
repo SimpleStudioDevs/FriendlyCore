@@ -6,13 +6,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageUtil {
-    private static Plugin plugin;
+    private static BroadcastFeature feature;
     private static MiniMessage mini;
 
     // &0–&9, &a–&f, &k–&o, &r
@@ -20,8 +19,8 @@ public class MessageUtil {
 
     private MessageUtil() {}
 
-    public static void init(Plugin pl, MiniMessage mm) {
-        plugin = pl;
+    public static void init(BroadcastFeature f, MiniMessage mm) {
+        feature = f;
         mini = mm;
     }
 
@@ -41,8 +40,8 @@ public class MessageUtil {
     }
 
     public static Component mmConfig(String key, TagResolver... resolvers) {
-        String fullKey = "player-broadcast.messages." + key;
-        String raw = plugin.getConfig().getString(fullKey, "");
+        String fullKey = "messages." + key;
+        String raw = feature.getConfig().getString(fullKey, "");
         String processed = convertLegacyToMiniMessage(raw);
         if (resolvers == null || resolvers.length == 0) {
             return mini.deserialize(processed);

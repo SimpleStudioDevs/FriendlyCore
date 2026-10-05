@@ -8,12 +8,10 @@ import com.friendlysmp.core.features.creativeitemcontrol.listeners.InventoryList
 import com.friendlysmp.core.features.creativeitemcontrol.managers.ConfigManager;
 import com.friendlysmp.core.features.creativeitemcontrol.managers.ExcludedItemManager;
 import com.friendlysmp.core.features.creativeitemcontrol.managers.MessageManager;
-import org.bukkit.event.HandlerList;
 
 import java.io.File;
 
-public class CreativeFeature implements Feature {
-    private final FriendlyCorePlugin plugin;
+public class CreativeFeature extends Feature {
     private ConfigManager configManager;
     private ExcludedItemManager excludedItemManager;
     private MessageManager messageManager;
@@ -21,7 +19,7 @@ public class CreativeFeature implements Feature {
     private DispenserListener dispenserListener;
 
     public CreativeFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
@@ -39,8 +37,8 @@ public class CreativeFeature implements Feature {
         dispenserListener = new DispenserListener(this);
         inventoryListener = new InventoryListener(this);
 
-        plugin.getServer().getPluginManager().registerEvents(inventoryListener, plugin);
-        plugin.getServer().getPluginManager().registerEvents(dispenserListener, plugin);
+        registerListener(inventoryListener);
+        registerListener(dispenserListener);
 
         var cmd = plugin.getCommand("cic");
         if (cmd != null) {
@@ -52,19 +50,16 @@ public class CreativeFeature implements Feature {
 
     @Override
     public void disable() {
-        HandlerList.unregisterAll(dispenserListener);
-        HandlerList.unregisterAll(inventoryListener);
     }
 
     @Override
     public void reload() {
-        plugin.reloadConfig();
         configManager.load();
         excludedItemManager.loadAll();
     }
 
     public FriendlyCorePlugin getPlugin() { return plugin; }
-    public File getDataFolder() { return new File(plugin.getDataFolder(), "CreativeItemControl"); }
+    public File getDataFolder() { return new File(plugin.getDataFolder(), "FeatureConfigs/CreativeItemControl"); }
     public ConfigManager getConfigManager() { return configManager; }
     public ExcludedItemManager getExcludedItemManager() { return excludedItemManager; }
     public MessageManager getMessageManager() { return messageManager; }

@@ -20,15 +20,14 @@ import java.util.Set;
 
 
 
-public final class BeaconHiderFeature implements Feature {
+public final class BeaconHiderFeature extends Feature {
 
-    private final FriendlyCorePlugin plugin;
     private final Set<Block> knownBeacons = new HashSet<>();
 
     private ScheduledTask task;
 
     public BeaconHiderFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
@@ -38,7 +37,7 @@ public final class BeaconHiderFeature implements Feature {
 
     @Override
     public void enable() {
-        plugin.getServer().getPluginManager().registerEvents(new BeaconHiderListener(this), plugin);
+        registerListener(new BeaconHiderListener(this));
 
         for (World world : plugin.getServer().getWorlds()) {
             for (Chunk chunk : world.getLoadedChunks()) {

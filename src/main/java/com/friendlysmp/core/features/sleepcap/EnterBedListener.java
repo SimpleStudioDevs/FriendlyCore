@@ -45,8 +45,8 @@ public class EnterBedListener implements Listener {
         int playersInWorld = world.getPlayers().size();
         if (playersInWorld == 0) return;
 
-        int basePercent = feature.getConfig().getInt("sleep-cap.base-percentage", 25);
-        int cap = feature.getConfig().getInt("sleep-cap.limit", 5);
+        int basePercent = feature.getConfig().getInt("base-percentage", 25);
+        int cap = feature.getConfig().getInt("limit", 5);
 
         int rawRequired = (int) Math.ceil(playersInWorld * basePercent / 100.0);
         int cappedRequired = Math.min(rawRequired, cap);

@@ -39,7 +39,7 @@ public final class FeatureManager {
     public void disableAll() {
         for (Feature f : features.values()) {
             if (enabledState.getOrDefault(f.id().toLowerCase(), false)) {
-                try { f.disable(); } catch (Exception ignored) {}
+                try { disableFeature(f); } catch (Exception ignored) {}
             }
         }
     }
@@ -58,7 +58,7 @@ public final class FeatureManager {
 
         if (!shouldEnable && isEnabled) {
             plugin.getLogger().info("Disabling feature: " + id);
-            f.disable();
+            disableFeature(f);
             enabledState.put(id, false);
             return;
         }
@@ -66,6 +66,14 @@ public final class FeatureManager {
 
         if (shouldEnable) {
             f.reload();
+        }
+    }
+
+    private void disableFeature(Feature f) {
+        try {
+            f.disable();
+        } finally {
+            f.unregisterListeners();
         }
     }
 }

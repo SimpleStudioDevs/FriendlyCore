@@ -1,0 +1,6 @@
+debug: false
+
+max-xp-points-bottle: 100000
+min-xp-points-bottle: 10
+blocked-redeem-worlds:
+  - zelduels_arenas

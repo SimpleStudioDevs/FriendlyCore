@@ -22,10 +22,12 @@ import java.util.Locale;
 
 public class BottleXPCommand implements CommandExecutor, TabCompleter {
     private final NamespacedKey xpPointsKey;
+    private final BottleXPFeature feature;
     private final FriendlyCorePlugin plugin;
 
-    public BottleXPCommand(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+    public BottleXPCommand(BottleXPFeature feature) {
+        this.feature = feature;
+        this.plugin = feature.getPlugin();
         this.xpPointsKey = new NamespacedKey(plugin, "stored_xp_points");
     }
 
@@ -37,7 +39,7 @@ public class BottleXPCommand implements CommandExecutor, TabCompleter {
         }
         Player player = (Player) sender;
 
-        final boolean debug = plugin.getConfig().getBoolean("bottle-xp.debug");
+        final boolean debug = feature.getConfig().getBoolean("debug", false);
 
         if (args.length == 0) {
             player.sendMessage(Component.text("/" + label + " <amount|all> [bottles]", NamedTextColor.YELLOW));
@@ -45,15 +47,15 @@ public class BottleXPCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("reload")) {
-            plugin.reloadConfig();
+            feature.reload();
             sender.sendMessage(Component.text("BottleXP Config has been reloaded!", NamedTextColor.GREEN));
             return true;
         }
 
         final boolean withdrawAll = args[0].equalsIgnoreCase("all");
 
-        final int minPoints = plugin.getConfig().getInt(
-                "bottle-xp.min-xp-points-bottle", 10
+        final int minPoints = feature.getConfig().getInt(
+                "min-xp-points-bottle", 10
         );
 
         // Total XP the player currently has (points, not levels)
@@ -63,8 +65,8 @@ public class BottleXPCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        final int maxPoints = plugin.getConfig().getInt(
-                "bottle-xp.max-xp-points-bottle", 100000
+        final int maxPoints = feature.getConfig().getInt(
+                "max-xp-points-bottle", 100000
         );
 
 

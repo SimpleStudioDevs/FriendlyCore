@@ -1,19 +1,16 @@
 package com.friendlysmp.core.features.creativeitemcontrol.managers;
 
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
 import io.papermc.paper.datacomponent.DataComponentType;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ConfigManager {
-    private static final String RESOURCE_PATH = "CreativeItemControl/config.yml";
+    private static final String RESOURCE_PATH = "FeatureConfigs/CreativeItemControl/config.yml";
 
     public enum ConfigKeys {
         // Main Config Options
@@ -73,25 +70,16 @@ public class ConfigManager {
     public List<World> worlds = new ArrayList<>();
     public List<DataComponentType> resolvedComponents = new ArrayList<>();
     private final Map<Material, ItemStack> defaultItemCache = new EnumMap<>(Material.class);
-    private final CreativeFeature feature;
-    private final File file;
+    private final FeatureConfig featureConfig;
     private YamlConfiguration config = new YamlConfiguration();
 
     public ConfigManager(CreativeFeature feature) {
-        this.feature = feature;
-        this.file = new File(feature.getDataFolder(), "config.yml");
+        this.featureConfig = new FeatureConfig(feature.getPlugin(), RESOURCE_PATH);
     }
 
     public void load() {
-        if (!file.exists()) {
-            feature.getPlugin().saveResource(RESOURCE_PATH, false);
-        }
-
-        config = YamlConfiguration.loadConfiguration(file);
-        InputStream defaults = feature.getPlugin().getResource(RESOURCE_PATH);
-        if (defaults != null) {
-            config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defaults, StandardCharsets.UTF_8)));
-        }
+        featureConfig.load();
+        config = featureConfig.get();
 
         cachedConfig.clear();
         worlds.clear();

@@ -1,27 +1,31 @@
 package com.friendlysmp.core.features.zeladdon;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
+import com.friendlysmp.core.placeholder.FriendlyCoreExpansion;
+import com.friendlysmp.core.placeholder.PlaceholderProvider;
 import com.friendlysmp.core.schedulers.Schedulers;
 import it.pino.zelchat.api.ZelChatAPI;
+import org.bukkit.Statistic;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.HandlerList;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class ZelAddonFeature implements Feature {
+public class ZelAddonFeature extends Feature implements PlaceholderProvider {
     private StaffChatModule staffChatModule;
     private SwearWarnModule swearWarnModule;
-    private final FriendlyCorePlugin plugin;
     private final Schedulers schedulers;
+    private final FeatureConfig config;
     private SpyMsgPersist spyMsgPersist;
 
     public ZelAddonFeature(FriendlyCorePlugin plugin, Schedulers schedulers) {
-        this.plugin = plugin;
+        super(plugin);
         this.schedulers = schedulers;
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/zeladdon.yml");
     }
 
     @Override
@@ -31,6 +35,8 @@ public class ZelAddonFeature implements Feature {
 
     @Override
     public void enable() {
+        config.load();
+
         swearWarnModule =  new SwearWarnModule(this);
         staffChatModule = new StaffChatModule(loadFormats());
 
@@ -40,12 +46,7 @@ public class ZelAddonFeature implements Feature {
         this.getLogger().info("Module register call finished.");
 
         // SpyMsg Listener
-        spyMsgPersist = new SpyMsgPersist(this, plugin);
-        if (plugin.getConfig().getBoolean("features.zel-addon.spy-msg")) {
-            plugin.getServer().getPluginManager().registerEvents(spyMsgPersist, plugin);
-        }
-
-
+        syncSpyMsgListener();
     }
 
     @Override
@@ -56,24 +57,28 @@ public class ZelAddonFeature implements Feature {
         if (staffChatModule != null) {
             ZelChatAPI.get().getModuleManager().unregister(plugin, staffChatModule);
         }
-        if (spyMsgPersist != null) {
-            HandlerList.unregisterAll(spyMsgPersist);
-        }
+        spyMsgPersist = null;
     }
 
     @Override
     public void reload() {
-        plugin.reloadConfig();
-        if (spyMsgPersist != null) {
-            if (!plugin.getConfig().getBoolean("features.zel-addon.spy-msg")) {
-                HandlerList.unregisterAll(spyMsgPersist);
-                spyMsgPersist = null;
-            }
+        config.load();
+        syncSpyMsgListener();
+    }
+
+    private void syncSpyMsgListener() {
+        boolean enabled = config.get().getBoolean("spy-msg");
+        if (enabled && spyMsgPersist == null) {
+            spyMsgPersist = new SpyMsgPersist(this, plugin);
+            registerListener(spyMsgPersist);
+        } else if (!enabled && spyMsgPersist != null) {
+            unregisterListener(spyMsgPersist);
+            spyMsgPersist = null;
         }
     }
 
     private Map<String, String> loadFormats() {
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("zel-addon.FORMATS");
+        ConfigurationSection section = config.get().getConfigurationSection("FORMATS");
         Map<String, String> formats = new LinkedHashMap<>();
 
         if (section != null) {
@@ -92,11 +97,40 @@ public class ZelAddonFeature implements Feature {
     }
 
     public final Configuration getConfig() {
-        return plugin.getConfig();
+        return config.get();
     }
 
     public final Logger getLogger() {
         return plugin.getLogger();
     }
 
+
+    @Override
+    public void registerPlaceholders(FriendlyCoreExpansion expansion) {
+        expansion.registerHandler("zel", (player, args) -> {
+            if (args.length == 0) return "";
+            if (args[0].equalsIgnoreCase("playtime")) return formatPlaytime(player.getStatistic(Statistic.PLAY_ONE_MINUTE));
+            return "";
+        });
+    }
+
+    private static final long[] UNIT_MINUTES = {365L * 24 * 60, 30L * 24 * 60, 24 * 60, 60};
+    private static final String[] UNIT_NAMES = {"year", "month", "day", "hour"};
+
+    public String formatPlaytime(int playtime)  {
+        long minutes = playtime / 20L / 60L;
+        if (minutes < 60) return minutes + (minutes == 1 ? " minute" : " minutes");
+
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < UNIT_MINUTES.length; i++) {
+            long amount = minutes / UNIT_MINUTES[i];
+            if (amount == 0) continue;
+            minutes %= UNIT_MINUTES[i];
+
+            if (!out.isEmpty()) out.append(", ");
+            out.append(amount).append(' ').append(UNIT_NAMES[i]);
+            if (amount != 1) out.append('s');
+        }
+        return out.toString();
+    }
 }

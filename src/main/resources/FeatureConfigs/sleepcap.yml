@@ -1,0 +1,2 @@
+base-percentage: 25 # Default required sleeping percentage
+limit: 5 # Maximum number of players that can be required to sleep

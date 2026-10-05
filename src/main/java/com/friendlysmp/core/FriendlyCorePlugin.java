@@ -73,7 +73,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new ChatPatrolFeature(this, schedulers));
         featureManager.register(new ZelAddonFeature(this, schedulers));
         featureManager.register(new BottleXPFeature(this));
-        featureManager.register(new AchievementGuardFeature(this));
+        // featureManager.register(new AchievementGuardFeature(this));
         featureManager.register(new SleepCapFeature(this));
         featureManager.register(new VoidGuardFeature(this));
         featureManager.register(new GeyserCombatLogFeature(this));

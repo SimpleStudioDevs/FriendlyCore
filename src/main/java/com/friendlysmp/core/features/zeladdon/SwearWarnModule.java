@@ -31,7 +31,7 @@ public class SwearWarnModule implements ChatModule {
         String words = String.join(", ", infraction.getFlaggedRules().keySet());
 
         String command = plugin.getConfig()
-                .getString("zel-addon.COMMAND", "say {player} swore: {words}")
+                .getString("COMMAND", "say {player} swore: {words}")
                 .replace("{player}", chatMessage.getBukkitPlayer().getName())
                 .replace("{message}", raw)
                 .replace("{words}", words);
@@ -39,7 +39,7 @@ public class SwearWarnModule implements ChatModule {
         plugin.getSchedulers().global(() -> {
             boolean success = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
 
-            if (plugin.getConfig().getBoolean("features.zel-addon.debug", false)) {
+            if (plugin.getConfig().getBoolean("debug", false)) {
                 plugin.getLogger().info("Executed command: " + command + " | success=" + success);
             }
         });

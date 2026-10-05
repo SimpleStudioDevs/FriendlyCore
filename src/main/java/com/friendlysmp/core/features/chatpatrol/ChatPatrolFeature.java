@@ -9,19 +9,17 @@ import com.friendlysmp.core.features.chatpatrol.listeners.SignListener;
 import com.friendlysmp.core.features.chatpatrol.managers.ConfigManager;
 import com.friendlysmp.core.schedulers.Schedulers;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.Configuration;
 
 import java.util.List;
 
 import static org.bukkit.Bukkit.getServer;
 
-public class ChatPatrolFeature implements Feature {
-    public final FriendlyCorePlugin plugin;
+public class ChatPatrolFeature extends Feature {
     private final Schedulers schedulers;
 
     private ConfigManager configManager;
     public ChatPatrolFeature(FriendlyCorePlugin plugin, Schedulers schedulers) {
-        this.plugin = plugin;
+        super(plugin);
         this.schedulers = schedulers;
     }
 
@@ -32,13 +30,14 @@ public class ChatPatrolFeature implements Feature {
 
     @Override
     public void enable() {
-        this.configManager = new ConfigManager(plugin);
+        if (configManager == null) configManager = new ConfigManager(plugin);
+        configManager.reload();
 
 
-        getServer().getPluginManager().registerEvents(new ChatListener(this), plugin);
-        getServer().getPluginManager().registerEvents(new SignListener(this), plugin);
-        getServer().getPluginManager().registerEvents(new AnvilListener(this), plugin);
-        getServer().getPluginManager().registerEvents(new BookListener(this), plugin);
+        registerListener(new ChatListener(this));
+        registerListener(new SignListener(this));
+        registerListener(new AnvilListener(this));
+        registerListener(new BookListener(this));
 
         PluginCommand command = plugin.getCommand("chatpatrol");
         if (command != null) {
@@ -62,9 +61,7 @@ public class ChatPatrolFeature implements Feature {
     }
 
 
-    public Configuration getConfig() {
-        return plugin.getConfig();
-    }
+    public FriendlyCorePlugin getPlugin() { return plugin; }
     public ConfigManager getConfigManager() { return configManager; }
 
     public Schedulers getSchedulers() { return schedulers; }

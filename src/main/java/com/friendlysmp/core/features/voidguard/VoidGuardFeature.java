@@ -1,6 +1,7 @@
 package com.friendlysmp.core.features.voidguard;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -13,12 +14,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class VoidGuardFeature implements Feature {
-    private final FriendlyCorePlugin plugin;
+public class VoidGuardFeature extends Feature {
+    private final FeatureConfig config;
     public Set<String> guardedWorlds = new HashSet<>();
 
     public VoidGuardFeature(FriendlyCorePlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/voidguard.yml");
     }
 
     @Override
@@ -28,7 +30,8 @@ public class VoidGuardFeature implements Feature {
 
     @Override
     public void enable() {
-        plugin.getServer().getPluginManager().registerEvents(new VoidGuardListener(this), plugin);
+        config.load();
+        registerListener(new VoidGuardListener(this));
         reloadGuardedWorlds();
 
         if (plugin.getCommand("voidguard") != null) {
@@ -41,7 +44,7 @@ public class VoidGuardFeature implements Feature {
     }
 
     public void reloadGuardedWorlds() {
-        List<String> list = plugin.getConfig().getStringList("void-guard.guarded-worlds");
+        List<String> list = config.get().getStringList("guarded-worlds");
         guardedWorlds.clear();
         guardedWorlds.addAll(list);
     }
@@ -53,32 +56,33 @@ public class VoidGuardFeature implements Feature {
 
     @Override
     public void reload() {
+        config.load();
         reloadGuardedWorlds();
     }
 
     public void saveVoidLocation(World world, Location loc) {
-        String path = "void-guard.locations." + world.getName();
-        Configuration config = plugin.getConfig();
+        String path = "locations." + world.getName();
+        Configuration yaml = config.get();
 
-        config.set(path + ".world", world.getName());
-        config.set(path + ".x", loc.getX());
-        config.set(path + ".y", loc.getY());
-        config.set(path + ".z", loc.getZ());
-        config.set(path + ".yaw", loc.getYaw());
-        config.set(path + ".pitch", loc.getPitch());
+        yaml.set(path + ".world", world.getName());
+        yaml.set(path + ".x", loc.getX());
+        yaml.set(path + ".y", loc.getY());
+        yaml.set(path + ".z", loc.getZ());
+        yaml.set(path + ".yaw", loc.getYaw());
+        yaml.set(path + ".pitch", loc.getPitch());
 
         if (!guardedWorlds.contains(world.getName())) {
             guardedWorlds.add(world.getName());
-            config.set("void-guard.guarded-worlds", new ArrayList<>(guardedWorlds));
+            yaml.set("guarded-worlds", new ArrayList<>(guardedWorlds));
         }
 
-        plugin.saveConfig();
+        config.save();
 
     }
 
     public Location getVoidLocation(World world) {
-        String path = "void-guard.locations." + world.getName();
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection(path);
+        String path = "locations." + world.getName();
+        ConfigurationSection section = config.get().getConfigurationSection(path);
 
         if (section == null) {
             return world.getSpawnLocation();
