@@ -1,0 +1,5 @@
+combat-tag-seconds: 15
+disabled-worlds:
+  - zelduels_arenas
+hide-own-armor: true
+debug: false

@@ -29,6 +29,7 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
 
     private HideArmorConditions conditions;
     private ArmorPacketListener registered;
+    private ArmorDebugListener debugListener;
 
     public HideArmorFeature(FriendlyCorePlugin plugin, PlayerSettingsStore store) {
         super(plugin);
@@ -45,6 +46,7 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
     public void enable() {
         config.load();
         conditions = new HideArmorConditions(plugin, store, this::refreshViewers);
+        debugListener = new ArmorDebugListener(plugin.getLogger(), store, conditions);
         applyConfig();
 
         PluginCommand cmd = plugin.getCommand("hidearmor");
@@ -58,20 +60,25 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
             playerEntityIds.put(online.getEntityId(), online.getUniqueId());
             store.ensureLoadedAsync(online.getUniqueId());
         }
-        registerListener(new HideArmorPlayerListener(store, playerEntityIds));
+        registerListener(new HideArmorPlayerListener(plugin, store, playerEntityIds, conditions));
         registerListener(conditions);
 
         registered = new ArmorPacketListener(store, playerEntityIds, conditions);
         PacketEvents.getAPI().getEventManager().registerListener(registered);
+        PacketEvents.getAPI().getEventManager().registerListener(debugListener);
     }
 
     private void applyConfig() {
         conditions.configure(
                 config.get().getLong("combat-tag-seconds", 15L),
-                config.get().getStringList("disabled-worlds"));
+                config.get().getStringList("disabled-worlds"),
+                config.get().getBoolean("hide-own-armor", true));
+        debugListener.setEnabled(config.get().getBoolean("debug", false));
     }
 
     private void refreshViewers(Player target) {
+        target.updateInventory();
+
         PlayerInventory inv = target.getInventory();
         for (Player viewer : target.getWorld().getPlayers()) {
             if (viewer.equals(target) || !viewer.canSee(target)) continue;
@@ -107,6 +114,10 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
         if (registered != null) {
             PacketEvents.getAPI().getEventManager().unregisterListener(registered);
             registered = null;
+        }
+        if (debugListener != null) {
+            PacketEvents.getAPI().getEventManager().unregisterListener(debugListener);
+            debugListener = null;
         }
         playerEntityIds.clear();
     }

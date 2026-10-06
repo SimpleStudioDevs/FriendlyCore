@@ -33,6 +33,7 @@ public final class HideArmorConditions implements Listener {
 
     private volatile long combatMillis;
     private volatile Set<String> disabledWorlds = Set.of();
+    private volatile boolean hideOwnArmor;
 
     public HideArmorConditions(Plugin plugin, PlayerSettingsStore store, Consumer<Player> refreshViewers) {
         this.plugin = plugin;
@@ -40,15 +41,25 @@ public final class HideArmorConditions implements Listener {
         this.refreshViewers = refreshViewers;
     }
 
-    public void configure(long combatSeconds, Collection<String> worlds) {
+    public void configure(long combatSeconds, Collection<String> worlds, boolean hideOwn) {
         combatMillis = Math.max(0L, combatSeconds) * 1000L;
         disabledWorlds = worlds.stream()
                 .map(w -> w.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toUnmodifiableSet());
 
+        boolean hideOwnChanged = hideOwnArmor != hideOwn;
+        hideOwnArmor = hideOwn;
+
         for (Player online : plugin.getServer().getOnlinePlayers()) {
-            online.getScheduler().run(plugin, task -> updateWorld(online), null);
+            online.getScheduler().run(plugin, task -> {
+                updateWorld(online);
+                if (hideOwnChanged && store.isArmorHidden(online.getUniqueId())) online.updateInventory();
+            }, null);
         }
+    }
+
+    public boolean hidesOwnArmor() {
+        return hideOwnArmor;
     }
 
     public boolean isForcedVisible(UUID uuid) {

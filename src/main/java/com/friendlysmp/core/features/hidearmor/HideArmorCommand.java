@@ -63,6 +63,9 @@ public final class HideArmorCommand implements CommandExecutor, TabCompleter {
 
     private void sendStatus(Player player, boolean hidden) {
         player.sendMessage("Armor visible to others: " + (hidden ? "§cHIDDEN" : "§aVISIBLE"));
+        if (hidden) {
+            player.sendMessage("§7Other players will not be able to see your armor");
+        }
         if (!hidden) return;
 
         UUID uuid = player.getUniqueId();

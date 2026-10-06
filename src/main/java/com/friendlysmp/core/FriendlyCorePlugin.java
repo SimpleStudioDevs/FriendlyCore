@@ -9,6 +9,7 @@ import com.friendlysmp.core.features.chatgames.ChatgamesFeature;
 import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
 import com.friendlysmp.core.features.commandmaker.CommandFeature;
 import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
+import com.friendlysmp.core.features.dupepatch.DupePatchFeature;
 import com.friendlysmp.core.features.geysercombatlog.GeyserCombatLogFeature;
 import com.friendlysmp.core.features.hidearmor.HideArmorFeature;
 import com.friendlysmp.core.features.playerbroadcast.BroadcastFeature;
@@ -81,6 +82,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new BeaconHiderFeature(this));
         featureManager.register(new ZelDuelsFeature(this));
         featureManager.register(new HideArmorFeature(this, playerSettings));
+        featureManager.register(new DupePatchFeature(this));
 
         // Vault-required features
         if (setupEconomy()) {
