@@ -14,11 +14,14 @@ import java.util.function.Consumer;
 public final class HideArmorCommand implements CommandExecutor, TabCompleter {
     private final PlayerSettingsStore store;
     private final Consumer<Player> refreshViewers;
+    private final Consumer<Player> refreshHiddenArmorFor;
     private final HideArmorConditions conditions;
 
-    public HideArmorCommand(PlayerSettingsStore store, Consumer<Player> refreshViewers, HideArmorConditions conditions) {
+    public HideArmorCommand(PlayerSettingsStore store, Consumer<Player> refreshViewers,
+                            Consumer<Player> refreshHiddenArmorFor, HideArmorConditions conditions) {
         this.store = store;
         this.refreshViewers = refreshViewers;
+        this.refreshHiddenArmorFor = refreshHiddenArmorFor;
         this.conditions = conditions;
     }
 
@@ -54,11 +57,45 @@ public final class HideArmorCommand implements CommandExecutor, TabCompleter {
 
         if (args[0].equalsIgnoreCase("status")) {
             sendStatus(player, store.isArmorHidden(player.getUniqueId()));
+            sendSeeAllStatus(player, store.isSeeingAllArmor(player.getUniqueId()));
             return true;
         }
 
-        player.sendMessage("Usage: /hidearmor [toggle|on|off|status]");
+        if (args[0].equalsIgnoreCase("seeall")) {
+            return handleSeeAll(player, args);
+        }
+
+        player.sendMessage("Usage: /hidearmor [toggle|on|off|status|seeall]");
         return true;
+    }
+
+    private boolean handleSeeAll(Player player, String[] args) {
+        UUID uuid = player.getUniqueId();
+        String action = args.length < 2 ? "toggle" : args[1].toLowerCase();
+
+        boolean before = store.isSeeingAllArmor(uuid);
+        switch (action) {
+            case "toggle" -> store.toggleSeeingAllArmor(uuid);
+            case "on" -> store.setSeeingAllArmor(uuid, true);
+            case "off" -> store.setSeeingAllArmor(uuid, false);
+            case "status" -> {
+                sendSeeAllStatus(player, before);
+                return true;
+            }
+            default -> {
+                player.sendMessage("Usage: /hidearmor seeall [toggle|on|off|status]");
+                return true;
+            }
+        }
+
+        boolean now = store.isSeeingAllArmor(uuid);
+        if (now != before) refreshHiddenArmorFor.accept(player);
+        sendSeeAllStatus(player, now);
+        return true;
+    }
+
+    private void sendSeeAllStatus(Player player, boolean seeAll) {
+        player.sendMessage("Always see other players' armor: " + (seeAll ? "§aON" : "§cOFF"));
     }
 
     private void sendStatus(Player player, boolean hidden) {
@@ -78,7 +115,8 @@ public final class HideArmorCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("toggle", "on", "off", "status");
+        if (args.length == 1) return List.of("toggle", "on", "off", "status", "seeall");
+        if (args.length == 2 && args[0].equalsIgnoreCase("seeall")) return List.of("toggle", "on", "off", "status");
         return List.of();
     }
 }

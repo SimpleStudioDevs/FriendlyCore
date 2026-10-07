@@ -16,7 +16,7 @@ features:
   chat-patrol:
     enabled: true
   zel-addon:
-    enabled: true
+    enabled: true 
   bottle-xp:
     enabled: true
   sleep-cap:

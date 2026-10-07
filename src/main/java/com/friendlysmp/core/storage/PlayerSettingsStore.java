@@ -18,10 +18,12 @@ public final class PlayerSettingsStore {
 
     private final SqlManager sql;
     private final WitherSoundDao witherDao;
-    private final HideArmorDao hideArmorDao;
+    private final PlayerFlagDao hideArmorDao;
+    private final PlayerFlagDao seeAllArmorDao;
 
     private final Map<UUID, Boolean> muteWitherDeath = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> hideArmor = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> seeAllArmor = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> saveQueued = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> loading = new ConcurrentHashMap<>();
 
@@ -31,11 +33,13 @@ public final class PlayerSettingsStore {
 
         this.sql = new SqlManager(plugin);
         this.witherDao = new WitherSoundDao(sql.dataSource());
-        this.hideArmorDao = new HideArmorDao(sql.dataSource());
+        this.hideArmorDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_hide_armor", "hidden");
+        this.seeAllArmorDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_see_all_armor", "enabled");
 
         try {
             witherDao.init();
             hideArmorDao.init();
+            seeAllArmorDao.init();
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to init SQLite tables: " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(plugin);
@@ -54,8 +58,12 @@ public final class PlayerSettingsStore {
         return hideArmor.getOrDefault(uuid, false);
     }
 
+    public boolean isSeeingAllArmor(UUID uuid) {
+        return seeAllArmor.getOrDefault(uuid, false);
+    }
+
     private boolean isLoaded(UUID uuid) {
-        return muteWitherDeath.containsKey(uuid) && hideArmor.containsKey(uuid);
+        return muteWitherDeath.containsKey(uuid) && hideArmor.containsKey(uuid) && seeAllArmor.containsKey(uuid);
     }
 
     public void ensureLoadedAsync(UUID uuid) {
@@ -98,6 +106,12 @@ public final class PlayerSettingsStore {
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to load hide armor setting for " + uuid + ": " + e.getMessage());
         }
+
+        try {
+            seeAllArmor.putIfAbsent(uuid, seeAllArmorDao.load(uuid));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to load see all armor setting for " + uuid + ": " + e.getMessage());
+        }
     }
 
     public boolean setWitherDeathMuted(UUID uuid, boolean muted) {
@@ -124,6 +138,18 @@ public final class PlayerSettingsStore {
         return now;
     }
 
+    public boolean setSeeingAllArmor(UUID uuid, boolean enabled) {
+        seeAllArmor.put(uuid, enabled);
+        queueSave(uuid);
+        return enabled;
+    }
+
+    public boolean toggleSeeingAllArmor(UUID uuid) {
+        boolean now = !isSeeingAllArmor(uuid);
+        setSeeingAllArmor(uuid, now);
+        return now;
+    }
+
     private void queueSave(UUID uuid) {
         if (saveQueued.putIfAbsent(uuid, true) != null) return;
         schedulers.asyncLater(Duration.ofMillis(300), () -> saveNowAsync(uuid));
@@ -147,6 +173,11 @@ public final class PlayerSettingsStore {
             hideArmorDao.upsert(uuid, isArmorHidden(uuid));
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to save hide armor setting for " + uuid + ": " + e.getMessage());
+        }
+        try {
+            seeAllArmorDao.upsert(uuid, isSeeingAllArmor(uuid));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to save see all armor setting for " + uuid + ": " + e.getMessage());
         }
     }
 

@@ -37,6 +37,11 @@
       <option name="url" value="https://repo.pinodev.it/releases" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="repsy.io" />
+      <option name="name" value="repsy.io" />
+      <option name="url" value="https://repo.repsy.io/mvn/zeltuv/zelduels" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="placeholderapi" />
       <option name="name" value="placeholderapi" />
       <option name="url" value="https://repo.extendedclip.com/content/repositories/placeholderapi/" />

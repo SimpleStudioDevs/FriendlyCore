@@ -108,6 +108,7 @@ public final class ArmorPacketListener extends PacketListenerAbstract {
         int entityId = packet.getEntityId();
 
         if (entityId == receiver.getEntityId()) return;
+        if (store.isSeeingAllArmor(receiver.getUniqueId())) return;
 
         UUID owner = playerEntityIds.get(entityId);
         if (owner == null || !shouldHideFor(owner)) return;

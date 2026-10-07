@@ -51,7 +51,7 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
 
         PluginCommand cmd = plugin.getCommand("hidearmor");
         if (cmd != null) {
-            HideArmorCommand exec = new HideArmorCommand(store, this::refreshViewers, conditions);
+            HideArmorCommand exec = new HideArmorCommand(store, this::refreshViewers, this::refreshHiddenArmorFor, conditions);
             cmd.setExecutor(exec);
             cmd.setTabCompleter(exec);
         }
@@ -79,19 +79,30 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
     private void refreshViewers(Player target) {
         target.updateInventory();
 
-        PlayerInventory inv = target.getInventory();
         for (Player viewer : target.getWorld().getPlayers()) {
             if (viewer.equals(target) || !viewer.canSee(target)) continue;
-
-            List<Equipment> armor = List.of(
-                    new Equipment(EquipmentSlot.HELMET, toPacketItem(inv.getHelmet())),
-                    new Equipment(EquipmentSlot.CHEST_PLATE, toPacketItem(inv.getChestplate())),
-                    new Equipment(EquipmentSlot.LEGGINGS, toPacketItem(inv.getLeggings())),
-                    new Equipment(EquipmentSlot.BOOTS, toPacketItem(inv.getBoots()))
-            );
-            PacketEvents.getAPI().getPlayerManager().sendPacket(viewer,
-                    new WrapperPlayServerEntityEquipment(target.getEntityId(), armor));
+            sendArmor(target, viewer);
         }
+    }
+
+    private void refreshHiddenArmorFor(Player viewer) {
+        for (Player target : viewer.getWorld().getPlayers()) {
+            if (target.equals(viewer) || !viewer.canSee(target)) continue;
+            if (!store.isArmorHidden(target.getUniqueId())) continue;
+            target.getScheduler().run(plugin, task -> sendArmor(target, viewer), null);
+        }
+    }
+
+    private void sendArmor(Player target, Player viewer) {
+        PlayerInventory inv = target.getInventory();
+        List<Equipment> armor = List.of(
+                new Equipment(EquipmentSlot.HELMET, toPacketItem(inv.getHelmet())),
+                new Equipment(EquipmentSlot.CHEST_PLATE, toPacketItem(inv.getChestplate())),
+                new Equipment(EquipmentSlot.LEGGINGS, toPacketItem(inv.getLeggings())),
+                new Equipment(EquipmentSlot.BOOTS, toPacketItem(inv.getBoots()))
+        );
+        PacketEvents.getAPI().getPlayerManager().sendPacket(viewer,
+                new WrapperPlayServerEntityEquipment(target.getEntityId(), armor));
     }
 
     private static ItemStack toPacketItem(org.bukkit.inventory.ItemStack item) {
@@ -102,10 +113,14 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
     @Override
     public void registerPlaceholders(FriendlyCoreExpansion expansion) {
         expansion.registerHandler("hidearmor", (player, args) -> {
-            boolean hidden = store.isArmorHidden(player.getUniqueId());
-            if (args.length == 0) return hidden ? "ON" : "OFF";
-            if (args[0].equalsIgnoreCase("colored")) return hidden ? "§aON" : "§cOFF";
-            return hidden ? "ON" : "OFF";
+            boolean seeAll = args.length > 0 && args[0].equalsIgnoreCase("seeall");
+            String[] rest = seeAll ? java.util.Arrays.copyOfRange(args, 1, args.length) : args;
+
+            boolean on = seeAll
+                    ? store.isSeeingAllArmor(player.getUniqueId())
+                    : store.isArmorHidden(player.getUniqueId());
+            if (rest.length > 0 && rest[0].equalsIgnoreCase("colored")) return on ? "§aON" : "§cOFF";
+            return on ? "ON" : "OFF";
         });
     }
 

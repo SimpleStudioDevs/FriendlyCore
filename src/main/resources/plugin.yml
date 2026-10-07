@@ -5,6 +5,9 @@ api-version: "1.20"
 folia-supported: true
 softdepend: [PlaceholderAPI, Vault, ZelDuels]
 depend: [packetevents, ZelChat]
+libraries:
+  - com.zaxxer:HikariCP:5.1.0
+  - org.xerial:sqlite-jdbc:3.45.3.0
 
 commands:
   friendlycore:
@@ -15,7 +18,7 @@ commands:
     usage: /withersound [toggle|on|off|status]
   hidearmor:
     description: Toggle whether other players can see your armor.
-    usage: /hidearmor [toggle|on|off|status]
+    usage: /hidearmor [toggle|on|off|status|seeall]
   token:
     description: Token command
     usage: /token
