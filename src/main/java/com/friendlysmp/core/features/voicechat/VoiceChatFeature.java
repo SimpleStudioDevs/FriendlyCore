@@ -1,6 +1,7 @@
 package com.friendlysmp.core.features.voicechat;
 
 import com.friendlysmp.core.FriendlyCorePlugin;
+import com.friendlysmp.core.config.FeatureConfig;
 import com.friendlysmp.core.feature.Feature;
 import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
 import com.friendlysmp.core.features.zeladdon.ZelAddonFeature;
@@ -20,9 +21,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -45,6 +46,7 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
     private final PlayerSettingsStore playerSettings;
     private final ChatPatrolFeature chatPatrol;
     private final ZelAddonFeature zelAddon;
+    private final FeatureConfig config;
 
     private volatile VoicechatServerApi serverApi;
     private volatile boolean enabled;
@@ -58,6 +60,7 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
         this.playerSettings = playerSettings;
         this.chatPatrol = chatPatrol;
         this.zelAddon = zelAddon;
+        this.config = new FeatureConfig(plugin, "FeatureConfigs/voicechat.yml");
     }
 
     @Override
@@ -67,6 +70,7 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
 
     @Override
     public void enable() {
+        config.load();
         if (!plugin.getServer().getPluginManager().isPluginEnabled("voicechat")) {
             plugin.getLogger().info("[VoiceChat] Simple Voice Chat is not enabled!");
             return;
@@ -94,7 +98,7 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
 
         PluginCommand spyCommand = plugin.getCommand("vcspy");
         if (spyCommand != null) {
-            VoiceChatSpyCommand exec = new VoiceChatSpyCommand(playerSettings);
+            VoiceChatSpyCommand exec = new VoiceChatSpyCommand(this, playerSettings);
             spyCommand.setExecutor(exec);
             spyCommand.setTabCompleter(exec);
         }
@@ -113,6 +117,7 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
 
     @Override
     public void reload() {
+        config.load();
         loadSwearWords();
     }
 
@@ -188,6 +193,10 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
         sendGroupMessage(player, event.getMessage(), false);
     }
 
+    public Component message(String key, TagResolver... resolvers) {
+        return MiniMessage.miniMessage().deserialize(config.get().getString("messages." + key, ""), resolvers);
+    }
+
     public boolean isToggled(Player player) {
         return toggled.contains(player.getUniqueId());
     }
@@ -201,37 +210,38 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
         Group group = getGroup(player);
         if (group == null) {
             if (toggled.remove(player.getUniqueId())) {
-                player.sendMessage(Component.text("You are no longer in a VoiceChat group, so /vc toggle was turned off. Your message was not sent.", NamedTextColor.RED));
+                player.sendMessage(message("toggle_group_left"));
             } else {
-                player.sendMessage(Component.text("You are not in a VoiceChat group!", NamedTextColor.RED));
+                player.sendMessage(message("not_in_group"));
             }
             return;
         }
 
         if (!moderate(player, text, checkChatPatrol)) {
-            player.sendMessage(Component.text("Your message was blocked for inappropriate language.", NamedTextColor.RED));
+            player.sendMessage(message("blocked"));
             return;
         }
 
-        Component message = MiniMessage.miniMessage().deserialize("<gray>[<group>] <light_purple><player>: <white><message>",
+        TagResolver placeholders = TagResolver.resolver(
                 Placeholder.unparsed("group", group.getName()),
                 Placeholder.unparsed("player", player.getName()),
                 Placeholder.unparsed("message", text));
+        Component groupMessage = message("format", placeholders);
 
         List<Player> members = getPlayersInGroup(group.getId());
         for (Player p : members) {
-            p.sendMessage(message);
+            p.sendMessage(groupMessage);
         }
 
-        Component spyMessage = MiniMessage.miniMessage().deserialize("<dark_gray>[VC Spy] <gray>[<group>] <player>: <message>",
-                Placeholder.unparsed("group", group.getName()),
-                Placeholder.unparsed("player", player.getName()),
-                Placeholder.unparsed("message", text));
+        Component spyMessage = message("spy_format", placeholders);
 
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
-            if (isSpying(p) && !members.contains(p)) p.sendMessage(spyMessage);
+        if (!player.hasPermission("zelchat.staff")) {
+            for (Player p : plugin.getServer().getOnlinePlayers()) {
+                if (isSpying(p) && !members.contains(p)) p.sendMessage(spyMessage);
+            }
+            plugin.getServer().getConsoleSender().sendMessage(spyMessage);
         }
-        plugin.getServer().getConsoleSender().sendMessage(spyMessage);
+
     }
 
     public boolean isSpying(Player player) {

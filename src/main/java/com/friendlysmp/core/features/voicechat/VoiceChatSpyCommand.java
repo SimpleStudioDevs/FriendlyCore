@@ -1,8 +1,7 @@
 package com.friendlysmp.core.features.voicechat;
 
 import com.friendlysmp.core.storage.PlayerSettingsStore;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,20 +15,22 @@ import java.util.UUID;
 public final class VoiceChatSpyCommand implements CommandExecutor, TabCompleter {
     public static final String PERMISSION = "friendlycore.voicechat.spy";
 
+    private final VoiceChatFeature feature;
     private final PlayerSettingsStore store;
 
-    public VoiceChatSpyCommand(PlayerSettingsStore store) {
+    public VoiceChatSpyCommand(VoiceChatFeature feature, PlayerSettingsStore store) {
+        this.feature = feature;
         this.store = store;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("You must be a player to use this command!", NamedTextColor.RED));
+            sender.sendMessage(feature.message("players_only"));
             return true;
         }
         if (!player.hasPermission(PERMISSION)) {
-            player.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
+            player.sendMessage(feature.message("no_permission"));
             return true;
         }
 
@@ -42,14 +43,14 @@ public final class VoiceChatSpyCommand implements CommandExecutor, TabCompleter 
             case "on" -> sendStatus(player, !store.setVcSpyDisabled(uuid, false));
             case "off" -> sendStatus(player, !store.setVcSpyDisabled(uuid, true));
             case "status" -> sendStatus(player, !store.isVcSpyDisabled(uuid));
-            default -> player.sendMessage(Component.text("Usage: /vcspy [toggle|on|off|status]", NamedTextColor.RED));
+            default -> player.sendMessage(feature.message("spy_usage"));
         }
         return true;
     }
 
     private void sendStatus(Player player, boolean spying) {
-        player.sendMessage(Component.text("VoiceChat spy: ", NamedTextColor.GRAY)
-                .append(spying ? Component.text("ON", NamedTextColor.GREEN) : Component.text("OFF", NamedTextColor.RED)));
+        player.sendMessage(feature.message("spy_status",
+                Placeholder.component("status", feature.message(spying ? "spy_on" : "spy_off"))));
     }
 
     @Override

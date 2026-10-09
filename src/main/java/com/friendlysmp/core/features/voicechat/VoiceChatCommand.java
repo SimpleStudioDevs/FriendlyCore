@@ -1,7 +1,5 @@
 package com.friendlysmp.core.features.voicechat;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,22 +20,22 @@ public class VoiceChatCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] strings) {
         if (!(commandSender instanceof Player player)) {
-            commandSender.sendMessage(Component.text("You must be a player to use this command!", NamedTextColor.RED));
+            commandSender.sendMessage(feature.message("players_only"));
             return true;
         }
 
         if (strings.length == 0 || (strings.length == 1 && strings[0].equalsIgnoreCase("toggle"))) {
             if (feature.isToggled(player)) {
                 feature.setToggled(player, false);
-                player.sendMessage(Component.text("Your messages will now go to public chat.", NamedTextColor.GRAY));
+                player.sendMessage(feature.message("toggle_off"));
                 return true;
             }
             if (feature.getGroup(player) == null) {
-                player.sendMessage(Component.text("You are not in a VoiceChat group!", NamedTextColor.RED));
+                player.sendMessage(feature.message("not_in_group"));
                 return true;
             }
             feature.setToggled(player, true);
-            player.sendMessage(Component.text("Your messages will now go to your VoiceChat group.", NamedTextColor.GRAY));
+            player.sendMessage(feature.message("toggle_on"));
             return true;
         }
 
