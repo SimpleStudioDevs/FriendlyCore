@@ -33,3 +33,7 @@ features:
     enabled: true
   hidearmor:
     enabled: true
+  homes:
+    enabled: true
+  voicechat:
+    enabled: true

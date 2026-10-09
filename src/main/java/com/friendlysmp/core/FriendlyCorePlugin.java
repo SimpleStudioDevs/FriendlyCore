@@ -2,7 +2,6 @@ package com.friendlysmp.core;
 
 import com.friendlysmp.core.command.FriendlyCoreCommand;
 import com.friendlysmp.core.feature.FeatureManager;
-import com.friendlysmp.core.features.achievementguard.AchievementGuardFeature;
 import com.friendlysmp.core.features.beaconhider.BeaconHiderFeature;
 import com.friendlysmp.core.features.bottlexp.BottleXPFeature;
 import com.friendlysmp.core.features.chatgames.ChatgamesFeature;
@@ -12,9 +11,11 @@ import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
 import com.friendlysmp.core.features.dupepatch.DupePatchFeature;
 import com.friendlysmp.core.features.geysercombatlog.GeyserCombatLogFeature;
 import com.friendlysmp.core.features.hidearmor.HideArmorFeature;
+import com.friendlysmp.core.features.homes.HomesFeature;
 import com.friendlysmp.core.features.playerbroadcast.BroadcastFeature;
 import com.friendlysmp.core.features.sleepcap.SleepCapFeature;
 import com.friendlysmp.core.features.tokens.TokenFeature;
+import com.friendlysmp.core.features.voicechat.VoiceChatFeature;
 import com.friendlysmp.core.features.voidguard.VoidGuardFeature;
 import com.friendlysmp.core.features.withersound.WitherSoundFeature;
 import com.friendlysmp.core.features.zeladdon.ZelAddonFeature;
@@ -72,10 +73,11 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new TokenFeature(this, playerSettings));
         featureManager.register(new CreativeFeature(this));
         featureManager.register(new CommandFeature(this));
-        featureManager.register(new ChatPatrolFeature(this, schedulers));
-        featureManager.register(new ZelAddonFeature(this, schedulers));
+        ChatPatrolFeature chatPatrol = new ChatPatrolFeature(this, schedulers);
+        ZelAddonFeature zelAddon = new ZelAddonFeature(this, schedulers);
+        featureManager.register(chatPatrol);
+        featureManager.register(zelAddon);
         featureManager.register(new BottleXPFeature(this));
-        // featureManager.register(new AchievementGuardFeature(this));
         featureManager.register(new SleepCapFeature(this));
         featureManager.register(new VoidGuardFeature(this));
         featureManager.register(new GeyserCombatLogFeature(this));
@@ -83,6 +85,10 @@ public final class FriendlyCorePlugin extends JavaPlugin {
         featureManager.register(new ZelDuelsFeature(this));
         featureManager.register(new HideArmorFeature(this, playerSettings));
         featureManager.register(new DupePatchFeature(this));
+        featureManager.register(new HomesFeature(this, playerSettings, schedulers));
+        if (pm.getPlugin("voicechat") != null) {
+            featureManager.register(new VoiceChatFeature(this, schedulers, playerSettings, chatPatrol, zelAddon));
+        }
 
         // Vault-required features
         if (setupEconomy()) {

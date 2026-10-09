@@ -45,6 +45,13 @@ public class BlacklistCheck {
         return false;
     }
 
+    public boolean handleText(Player player, String message, String reason) {
+        if (!containsBlackListedWord(message)) return false;
+        logManager.logPunishment(player, reason, message);
+        punishmentManager.executeCommand(configManager.getBlacklistedWordsCommand(), player);
+        return true;
+    }
+
     public boolean containsBlackListedWord(String text) {
         String lowered = text.toLowerCase();
         for (String word : configManager.getBlacklistedWords()) {

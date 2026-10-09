@@ -2,16 +2,6 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
-      <option name="id" value="codemc-snapshots" />
-      <option name="name" value="codemc-snapshots" />
-      <option name="url" value="https://repo.codemc.io/repository/maven-snapshots/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Artillex-Studios" />
-      <option name="name" value="Artillex-Studios" />
-      <option name="url" value="https://repo.artillex-studios.com/releases/" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
@@ -22,17 +12,7 @@
       <option name="url" value="https://jitpack.io" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="codemc-releases" />
-      <option name="name" value="codemc-releases" />
-      <option name="url" value="https://repo.codemc.io/repository/maven-releases/" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="pinodev-repo-releases" />
-      <option name="name" value="Pineta" />
-      <option name="url" value="https://repo.pinodev.it/releases" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="pinodev-repo" />
       <option name="name" value="Pineta" />
       <option name="url" value="https://repo.pinodev.it/releases" />
     </remote-repository>
@@ -52,14 +32,44 @@
       <option name="url" value="https://repo1.maven.org/maven2" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="jboss.community" />
-      <option name="name" value="JBoss Community repository" />
-      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+      <option name="id" value="henkelmax.public" />
+      <option name="name" value="henkelmax.public" />
+      <option name="url" value="https://maven.maxhenkel.de/repository/public" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="papermc" />
       <option name="name" value="papermc" />
       <option name="url" value="https://repo.papermc.io/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="codemc-snapshots" />
+      <option name="name" value="codemc-snapshots" />
+      <option name="url" value="https://repo.codemc.io/repository/maven-snapshots/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="Artillex-Studios" />
+      <option name="name" value="Artillex-Studios" />
+      <option name="url" value="https://repo.artillex-studios.com/releases/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="codemc-releases" />
+      <option name="name" value="codemc-releases" />
+      <option name="url" value="https://repo.codemc.io/repository/maven-releases/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="pinodev-repo" />
+      <option name="name" value="Pineta" />
+      <option name="url" value="https://repo.pinodev.it/releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jboss.community" />
+      <option name="name" value="JBoss Community repository" />
+      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="essentialsx-releases" />
+      <option name="name" value="essentialsx-releases" />
+      <option name="url" value="https://repo.essentialsx.net/releases/" />
     </remote-repository>
   </component>
 </project>
