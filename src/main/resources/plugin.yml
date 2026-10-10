@@ -19,6 +19,9 @@ commands:
   hidearmor:
     description: Toggle whether other players can see your armor.
     usage: /hidearmor [toggle|on|off|status|seeall]
+  deathmessages:
+    description: Toggle whether you see death messages.
+    usage: /deathmessages [toggle|on|off|status]
   token:
     description: Token command
     usage: /token
@@ -71,13 +74,19 @@ commands:
     description: Toggle seeing /vc messages from all VoiceChat groups
     usage: /vcspy [toggle|on|off|status]
     permission: friendlycore.voicechat.spy
-
+  vcadmin:
+    description: VoiceChat admin tools
+    usage: /vcadmin password <player>
+    permission: friendlycore.voicechat.admin
 
 permissions:
   friendlycore.admin:
     default: op
   friendlycore.voicechat.spy:
     description: See /vc messages from all VoiceChat groups
+    default: op
+  friendlycore.voicechat.admin:
+    description: Use /vcadmin
     default: op
   # Tokens
   friendlycore.tokens.admin:

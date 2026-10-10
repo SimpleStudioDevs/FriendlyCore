@@ -9,6 +9,7 @@ import com.friendlysmp.core.features.chatpatrol.ChatPatrolFeature;
 import com.friendlysmp.core.features.commandmaker.CommandFeature;
 import com.friendlysmp.core.features.creativeitemcontrol.CreativeFeature;
 import com.friendlysmp.core.features.creeperdisable.CreeperDisableFeature;
+import com.friendlysmp.core.features.deathmessage.DeathMessageFeature;
 import com.friendlysmp.core.features.dupepatch.DupePatchFeature;
 import com.friendlysmp.core.features.geysercombatlog.GeyserCombatLogFeature;
 import com.friendlysmp.core.features.hidearmor.HideArmorFeature;
@@ -91,6 +92,7 @@ public final class FriendlyCorePlugin extends JavaPlugin {
             featureManager.register(new VoiceChatFeature(this, schedulers, playerSettings, chatPatrol, zelAddon));
         }
         featureManager.register(new CreeperDisableFeature(this));
+        featureManager.register(new DeathMessageFeature(this, playerSettings));
 
         // Vault-required features
         if (setupEconomy()) {

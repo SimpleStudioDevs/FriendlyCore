@@ -33,12 +33,15 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listener {
 
@@ -50,9 +53,15 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
 
     private volatile VoicechatServerApi serverApi;
     private volatile boolean enabled;
-    private volatile List<String> swearWords = List.of();
+    private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^a-z0-9]+");
+    private static final List<String> SUFFIXES = List.of("s", "es", "ed", "er", "ing");
+
+    private volatile Set<String> swearSingles = Set.of();
+    private volatile List<String> swearPhrases = List.of();
     private final Set<UUID> toggled = ConcurrentHashMap.newKeySet();
     private boolean registered;
+    private volatile Method groupImplGetGroup;
+    private volatile Method serverGroupGetPassword;
 
     public VoiceChatFeature(FriendlyCorePlugin plugin, Schedulers schedulers, PlayerSettingsStore playerSettings, ChatPatrolFeature chatPatrol, ZelAddonFeature zelAddon) {
         super(plugin);
@@ -103,6 +112,13 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
             spyCommand.setTabCompleter(exec);
         }
 
+        PluginCommand adminCommand = plugin.getCommand("vcadmin");
+        if (adminCommand != null) {
+            VoiceChatAdminCommand exec = new VoiceChatAdminCommand(this);
+            adminCommand.setExecutor(exec);
+            adminCommand.setTabCompleter(exec);
+        }
+
         registerListener(this);
         for (Player online : plugin.getServer().getOnlinePlayers()) {
             playerSettings.ensureLoadedAsync(online.getUniqueId());
@@ -124,39 +140,59 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
     private void loadSwearWords() {
         File file = new File(plugin.getDataFolder().getParentFile(), "ZelChat/filter/filter-rules.yml");
         if (!file.exists()) {
-            swearWords = List.of();
+            swearSingles = Set.of();
+            swearPhrases = List.of();
             plugin.getLogger().warning("[VoiceChat] ZelChat filter file not found at " + file.getPath());
             return;
         }
 
-        List<String> words = new ArrayList<>();
+        Set<String> singles = new HashSet<>();
+        List<String> phrases = new ArrayList<>();
         for (String word : YamlConfiguration.loadConfiguration(file).getStringList("rules.swearing.words")) {
-            if (!word.isBlank()) words.add(word.toLowerCase(Locale.ROOT));
+            String normalized = normalize(word);
+            if (normalized.isEmpty()) continue;
+            if (normalized.contains(" ")) phrases.add(normalized);
+            else singles.add(normalized);
         }
-        swearWords = List.copyOf(words);
-        plugin.getLogger().info("[VoiceChat] Loaded " + swearWords.size() + " swear words from ZelChat.");
+        swearSingles = Set.copyOf(singles);
+        swearPhrases = List.copyOf(phrases);
+        plugin.getLogger().info("[VoiceChat] Loaded " + (singles.size() + phrases.size()) + " swear words from ZelChat.");
     }
 
     public boolean moderate(Player player, String message, boolean checkChatPatrol) {
         if (player.hasPermission("zelchat.staff")) return true;
         if (checkChatPatrol && chatPatrol.punishIfBlacklisted(player, message, "Blacklisted Word In VoiceChat")) return false;
 
-        String lowered = message.toLowerCase(Locale.ROOT);
-        List<String> flagged = new ArrayList<>();
-        for (String word : swearWords) {
-            if (lowered.contains(word)) flagged.add(word);
-        }
-        if (flagged.isEmpty()) return true;
+        if (!containsSwear(message)) return true;
 
-        String template = zelAddon.getConfig().getString("COMMAND");
-        if (template != null && !template.isBlank()) {
-            String command = template
-                    .replace("{player}", player.getName())
-                    .replace("{message}", message)
-                    .replace("{words}", String.join(", ", flagged));
-            schedulers.global(() -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+        plugin.getLogger().info("Swear: " + message);
+        return false;
+    }
+
+    private boolean containsSwear(String message) {
+        String normalized = normalize(message);
+        if (normalized.isEmpty()) return false;
+
+        Set<String> singles = swearSingles;
+        for (String token : normalized.split(" ")) {
+            if (singles.contains(token)) return true;
+            for (String suffix : SUFFIXES) {
+                if (token.length() > suffix.length() + 1 && token.endsWith(suffix)
+                        && singles.contains(token.substring(0, token.length() - suffix.length()))) {
+                    return true;
+                }
+            }
+        }
+
+        String padded = " " + normalized + " ";
+        for (String phrase : swearPhrases) {
+            if (padded.contains(" " + phrase + " ")) return true;
         }
         return false;
+    }
+
+    private static String normalize(String text) {
+        return NON_ALPHANUMERIC.matcher(text.toLowerCase(Locale.ROOT)).replaceAll(" ").trim();
     }
 
     @Override
@@ -276,6 +312,30 @@ public class VoiceChatFeature extends Feature implements VoicechatPlugin, Listen
             if (group != null && group.getId().equals(groupId)) members.add(online);
         }
         return members;
+    }
+
+    @Nullable
+    public String getGroupPassword(Group group) {
+        try {
+            Method getGroup = groupImplGetGroup;
+            if (getGroup == null || !getGroup.getDeclaringClass().isInstance(group)) {
+                getGroup = group.getClass().getMethod("getGroup");
+                groupImplGetGroup = getGroup;
+            }
+            Object serverGroup = getGroup.invoke(group);
+            if (serverGroup == null) return null;
+
+            Method getPassword = serverGroupGetPassword;
+            if (getPassword == null || !getPassword.getDeclaringClass().isInstance(serverGroup)) {
+                getPassword = serverGroup.getClass().getMethod("getPassword");
+                serverGroupGetPassword = getPassword;
+            }
+            Object password = getPassword.invoke(serverGroup);
+            return password instanceof String s ? s : null;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            plugin.getLogger().warning("[VoiceChat] Could not read group password via reflection: " + e);
+            return null;
+        }
     }
 
     public List<Player> getGroupMembers(Player player) {

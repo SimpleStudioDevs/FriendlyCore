@@ -21,11 +21,13 @@ public final class PlayerSettingsStore {
     private final PlayerFlagDao hideArmorDao;
     private final PlayerFlagDao seeAllArmorDao;
     private final PlayerFlagDao vcSpyDisabledDao;
+    private final PlayerFlagDao deathMessagesHiddenDao;
 
     private final Map<UUID, Boolean> muteWitherDeath = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> hideArmor = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> seeAllArmor = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> vcSpyDisabled = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> deathMessagesHidden = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> saveQueued = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> loading = new ConcurrentHashMap<>();
 
@@ -38,12 +40,14 @@ public final class PlayerSettingsStore {
         this.hideArmorDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_hide_armor", "hidden");
         this.seeAllArmorDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_see_all_armor", "enabled");
         this.vcSpyDisabledDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_vc_spy_disabled", "disabled");
+        this.deathMessagesHiddenDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_death_messages_hidden", "hidden");
 
         try {
             witherDao.init();
             hideArmorDao.init();
             seeAllArmorDao.init();
             vcSpyDisabledDao.init();
+            deathMessagesHiddenDao.init();
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to init SQLite tables: " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(plugin);
@@ -70,9 +74,13 @@ public final class PlayerSettingsStore {
         return vcSpyDisabled.getOrDefault(uuid, false);
     }
 
+    public boolean isDeathMessagesHidden(UUID uuid) {
+        return deathMessagesHidden.getOrDefault(uuid, false);
+    }
+
     private boolean isLoaded(UUID uuid) {
         return muteWitherDeath.containsKey(uuid) && hideArmor.containsKey(uuid) && seeAllArmor.containsKey(uuid)
-                && vcSpyDisabled.containsKey(uuid);
+                && vcSpyDisabled.containsKey(uuid) && deathMessagesHidden.containsKey(uuid);
     }
 
     public void ensureLoadedAsync(UUID uuid) {
@@ -127,6 +135,12 @@ public final class PlayerSettingsStore {
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to load vc spy setting for " + uuid + ": " + e.getMessage());
         }
+
+        try {
+            deathMessagesHidden.putIfAbsent(uuid, deathMessagesHiddenDao.load(uuid));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to load death messages setting for " + uuid + ": " + e.getMessage());
+        }
     }
 
     public boolean setWitherDeathMuted(UUID uuid, boolean muted) {
@@ -177,6 +191,18 @@ public final class PlayerSettingsStore {
         return now;
     }
 
+    public boolean setDeathMessagesHidden(UUID uuid, boolean hidden) {
+        deathMessagesHidden.put(uuid, hidden);
+        queueSave(uuid);
+        return hidden;
+    }
+
+    public boolean toggleDeathMessagesHidden(UUID uuid) {
+        boolean now = !isDeathMessagesHidden(uuid);
+        setDeathMessagesHidden(uuid, now);
+        return now;
+    }
+
     private void queueSave(UUID uuid) {
         if (saveQueued.putIfAbsent(uuid, true) != null) return;
         schedulers.asyncLater(Duration.ofMillis(300), () -> saveNowAsync(uuid));
@@ -210,6 +236,11 @@ public final class PlayerSettingsStore {
             vcSpyDisabledDao.upsert(uuid, isVcSpyDisabled(uuid));
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to save vc spy setting for " + uuid + ": " + e.getMessage());
+        }
+        try {
+            deathMessagesHiddenDao.upsert(uuid, isDeathMessagesHidden(uuid));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to save death messages setting for " + uuid + ": " + e.getMessage());
         }
     }
 
