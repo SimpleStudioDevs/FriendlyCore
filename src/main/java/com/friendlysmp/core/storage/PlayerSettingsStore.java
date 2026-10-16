@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlayerSettingsStore {
 
+    public static final int DEFAULT_HIDDEN_ARMOR_PIECES = 0b011111;
+
     private final JavaPlugin plugin;
     private final Schedulers schedulers;
 
@@ -22,12 +24,14 @@ public final class PlayerSettingsStore {
     private final PlayerFlagDao seeAllArmorDao;
     private final PlayerFlagDao vcSpyDisabledDao;
     private final PlayerFlagDao deathMessagesHiddenDao;
+    private final PlayerIntDao hiddenArmorPiecesDao;
 
     private final Map<UUID, Boolean> muteWitherDeath = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> hideArmor = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> seeAllArmor = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> vcSpyDisabled = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> deathMessagesHidden = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> hiddenArmorPieces = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> saveQueued = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> loading = new ConcurrentHashMap<>();
 
@@ -41,6 +45,7 @@ public final class PlayerSettingsStore {
         this.seeAllArmorDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_see_all_armor", "enabled");
         this.vcSpyDisabledDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_vc_spy_disabled", "disabled");
         this.deathMessagesHiddenDao = new PlayerFlagDao(sql.dataSource(), "friendlycore_death_messages_hidden", "hidden");
+        this.hiddenArmorPiecesDao = new PlayerIntDao(sql.dataSource(), "friendlycore_hidden_armor_pieces", "mask", DEFAULT_HIDDEN_ARMOR_PIECES);
 
         try {
             witherDao.init();
@@ -48,6 +53,7 @@ public final class PlayerSettingsStore {
             seeAllArmorDao.init();
             vcSpyDisabledDao.init();
             deathMessagesHiddenDao.init();
+            hiddenArmorPiecesDao.init();
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to init SQLite tables: " + e.getMessage());
             Bukkit.getPluginManager().disablePlugin(plugin);
@@ -78,9 +84,14 @@ public final class PlayerSettingsStore {
         return deathMessagesHidden.getOrDefault(uuid, false);
     }
 
+    public int getHiddenArmorPieces(UUID uuid) {
+        return hiddenArmorPieces.getOrDefault(uuid, DEFAULT_HIDDEN_ARMOR_PIECES);
+    }
+
     private boolean isLoaded(UUID uuid) {
         return muteWitherDeath.containsKey(uuid) && hideArmor.containsKey(uuid) && seeAllArmor.containsKey(uuid)
-                && vcSpyDisabled.containsKey(uuid) && deathMessagesHidden.containsKey(uuid);
+                && vcSpyDisabled.containsKey(uuid) && deathMessagesHidden.containsKey(uuid)
+                && hiddenArmorPieces.containsKey(uuid);
     }
 
     public void ensureLoadedAsync(UUID uuid) {
@@ -140,6 +151,12 @@ public final class PlayerSettingsStore {
             deathMessagesHidden.putIfAbsent(uuid, deathMessagesHiddenDao.load(uuid));
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to load death messages setting for " + uuid + ": " + e.getMessage());
+        }
+
+        try {
+            hiddenArmorPieces.putIfAbsent(uuid, hiddenArmorPiecesDao.load(uuid));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to load hidden armor pieces for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -203,6 +220,12 @@ public final class PlayerSettingsStore {
         return now;
     }
 
+    public int setHiddenArmorPieces(UUID uuid, int mask) {
+        hiddenArmorPieces.put(uuid, mask);
+        queueSave(uuid);
+        return mask;
+    }
+
     private void queueSave(UUID uuid) {
         if (saveQueued.putIfAbsent(uuid, true) != null) return;
         schedulers.asyncLater(Duration.ofMillis(300), () -> saveNowAsync(uuid));
@@ -241,6 +264,11 @@ public final class PlayerSettingsStore {
             deathMessagesHiddenDao.upsert(uuid, isDeathMessagesHidden(uuid));
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to save death messages setting for " + uuid + ": " + e.getMessage());
+        }
+        try {
+            hiddenArmorPiecesDao.upsert(uuid, getHiddenArmorPieces(uuid));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to save hidden armor pieces for " + uuid + ": " + e.getMessage());
         }
     }
 

@@ -67,6 +67,11 @@
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="enginehub" />
+      <option name="name" value="enginehub" />
+      <option name="url" value="https://maven.enginehub.org/repo/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="essentialsx-releases" />
       <option name="name" value="essentialsx-releases" />
       <option name="url" value="https://repo.essentialsx.net/releases/" />

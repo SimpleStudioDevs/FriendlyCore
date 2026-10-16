@@ -65,7 +65,12 @@ public final class HideArmorCommand implements CommandExecutor, TabCompleter {
             return handleSeeAll(player, args);
         }
 
-        player.sendMessage("Usage: /hidearmor [toggle|on|off|status|seeall]");
+        if (args[0].equalsIgnoreCase("menu")) {
+            new HideArmorMenu(player, store, refreshViewers).open();
+            return true;
+        }
+
+        player.sendMessage("Usage: /hidearmor [toggle|on|off|status|seeall|menu]");
         return true;
     }
 
@@ -115,7 +120,7 @@ public final class HideArmorCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("toggle", "on", "off", "status", "seeall");
+        if (args.length == 1) return List.of("toggle", "on", "off", "status", "seeall", "menu");
         if (args.length == 2 && args[0].equalsIgnoreCase("seeall")) return List.of("toggle", "on", "off", "status");
         return List.of();
     }

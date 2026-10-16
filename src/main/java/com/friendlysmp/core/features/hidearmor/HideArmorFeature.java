@@ -62,6 +62,7 @@ public final class HideArmorFeature extends Feature implements PlaceholderProvid
         }
         registerListener(new HideArmorPlayerListener(plugin, store, playerEntityIds, conditions));
         registerListener(conditions);
+        registerListener(new HideArmorMenuListener(plugin));
 
         registered = new ArmorPacketListener(store, playerEntityIds, conditions);
         PacketEvents.getAPI().getEventManager().registerListener(registered);

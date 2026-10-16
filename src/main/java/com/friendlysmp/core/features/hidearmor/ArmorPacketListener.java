@@ -8,8 +8,6 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.component.ComponentTypes;
 import com.github.retrooper.packetevents.protocol.component.builtin.item.ItemEquippable;
 import com.github.retrooper.packetevents.protocol.item.ItemStack;
-import com.github.retrooper.packetevents.protocol.item.type.ItemType;
-import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.protocol.player.Equipment;
@@ -34,17 +32,6 @@ public final class ArmorPacketListener extends PacketListenerAbstract {
             EquipmentSlot.CHEST_PLATE,
             EquipmentSlot.LEGGINGS,
             EquipmentSlot.BOOTS
-    );
-
-    static final Set<ItemType> skippedItems = Set.of(
-            ItemTypes.ZOMBIE_HEAD,
-            ItemTypes.PLAYER_HEAD,
-            ItemTypes.SKELETON_SKULL,
-            ItemTypes.WITHER_SKELETON_SKULL,
-            ItemTypes.ELYTRA,
-            ItemTypes.PIGLIN_HEAD,
-            ItemTypes.CREEPER_HEAD,
-            ItemTypes.DRAGON_HEAD
     );
 
     private static final String HIDDEN_NAMESPACE = "friendlycore";
@@ -77,13 +64,13 @@ public final class ArmorPacketListener extends PacketListenerAbstract {
             handleEquipment(event, receiver);
         } else if (type == PacketType.Play.Server.WINDOW_ITEMS) {
             if (!shouldHideOwnFor(receiver.getUniqueId())) return;
-            handleWindowItems(event);
+            handleWindowItems(event, store.getHiddenArmorPieces(receiver.getUniqueId()));
         } else if (type == PacketType.Play.Server.SET_SLOT) {
             if (!shouldHideOwnFor(receiver.getUniqueId())) return;
-            handleSetSlot(event);
+            handleSetSlot(event, store.getHiddenArmorPieces(receiver.getUniqueId()));
         } else if (type == PacketType.Play.Server.SET_PLAYER_INVENTORY) {
             if (!shouldHideOwnFor(receiver.getUniqueId())) return;
-            handleSetPlayerInventory(event);
+            handleSetPlayerInventory(event, store.getHiddenArmorPieces(receiver.getUniqueId()));
         }
     }
 
@@ -113,10 +100,14 @@ public final class ArmorPacketListener extends PacketListenerAbstract {
         UUID owner = playerEntityIds.get(entityId);
         if (owner == null || !shouldHideFor(owner)) return;
 
+        int mask = store.getHiddenArmorPieces(owner);
         boolean changed = false;
         for (Equipment equipment : packet.getEquipment()) {
             ItemStack item = equipment.getItem();
-            if (ARMOR_SLOTS.contains(equipment.getSlot()) && !item.isEmpty() && item.getType() != ItemTypes.ELYTRA) {
+            if (!ARMOR_SLOTS.contains(equipment.getSlot()) || item.isEmpty()) continue;
+
+            ArmorPiece piece = ArmorPiece.of(equipment.getSlot(), item.getType());
+            if (piece != null && piece.isHidden(mask)) {
                 equipment.setItem(ItemStack.EMPTY);
                 changed = true;
             }
@@ -125,39 +116,42 @@ public final class ArmorPacketListener extends PacketListenerAbstract {
         if (changed) event.markForReEncode(true);
     }
 
-    private void handleWindowItems(PacketSendEvent event) {
+    private void handleWindowItems(PacketSendEvent event, int mask) {
         WrapperPlayServerWindowItems packet = new WrapperPlayServerWindowItems(event);
         if (packet.getWindowId() != PLAYER_MENU_ID) return;
 
         List<ItemStack> items = packet.getItems();
         boolean changed = false;
         for (int slot = MENU_ARMOR_FIRST; slot <= MENU_ARMOR_LAST && slot < items.size(); slot++) {
-            changed |= hideAsset(items.get(slot));
+            changed |= hideAsset(items.get(slot), mask);
         }
 
         if (changed) event.markForReEncode(true);
     }
 
-    private void handleSetSlot(PacketSendEvent event) {
+    private void handleSetSlot(PacketSendEvent event, int mask) {
         WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event);
         if (packet.getWindowId() != PLAYER_MENU_ID) return;
         if (packet.getSlot() < MENU_ARMOR_FIRST || packet.getSlot() > MENU_ARMOR_LAST) return;
 
-        if (hideAsset(packet.getItem())) event.markForReEncode(true);
+        if (hideAsset(packet.getItem(), mask)) event.markForReEncode(true);
     }
 
-    private void handleSetPlayerInventory(PacketSendEvent event) {
+    private void handleSetPlayerInventory(PacketSendEvent event, int mask) {
         WrapperPlayServerSetPlayerInventory packet = new WrapperPlayServerSetPlayerInventory(event);
         if (packet.getSlot() < INVENTORY_ARMOR_FIRST || packet.getSlot() > INVENTORY_ARMOR_LAST) return;
 
-        if (hideAsset(packet.getStack())) event.markForReEncode(true);
+        if (hideAsset(packet.getStack(), mask)) event.markForReEncode(true);
     }
 
-    private static boolean hideAsset(ItemStack item) {
-        if (item == null || item.isEmpty() || skippedItems.contains(item.getType())) return false;
+    private static boolean hideAsset(ItemStack item, int mask) {
+        if (item == null || item.isEmpty()) return false;
 
         ItemEquippable equippable = item.getComponent(ComponentTypes.EQUIPPABLE).orElse(null);
         if (equippable == null || !ARMOR_SLOTS.contains(equippable.getSlot())) return false;
+
+        ArmorPiece piece = ArmorPiece.of(equippable.getSlot(), item.getType());
+        if (piece == null || !piece.isHidden(mask)) return false;
 
         ResourceLocation asset = equippable.getAssetId();
         if (asset == null || isHiddenAsset(asset)) return false;
